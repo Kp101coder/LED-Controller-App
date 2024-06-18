@@ -23,23 +23,28 @@ struct ContentView: View
                     .aspectRatio(contentMode: .fill)
                 VStack
                 {
-                    
+                    Label("Label", systemImage: "42.circle")
+                    Label("Label", systemImage: "42.circle")
+                    Label("Label", systemImage: "42.circle")
+                    Spacer()
                 }
+                .padding(ContentView().toolbar())
             }
             .toolbarBackground(Color.black, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar
             {
-                ToolbarItem(placement: .principal) 
+                ToolbarItem(placement: .principal)
                 {
                     Text("LED Controller")
                         .font(.largeTitle)
                         .accessibilityAddTraits(.isHeader)
-                }
-                ToolbarItem(placement: .navigationBarLeading)
-                {
-                    Image("highlight").resizable().frame(width:50,height:50,alignment:.center)
+                        .foregroundStyle(LinearGradient(
+                                colors: [.blue, .green, .brown, .pink],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                        ))
                 }
             }
         }
