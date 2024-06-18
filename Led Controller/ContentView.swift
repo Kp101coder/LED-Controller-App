@@ -23,12 +23,17 @@ struct ContentView: View
                     .aspectRatio(contentMode: .fill)
                 VStack
                 {
-                    Label("Label", systemImage: "42.circle")
-                    Label("Label", systemImage: "42.circle")
-                    Label("Label", systemImage: "42.circle")
+                    Text("Placeholder")
+                        .background(RoundedRectangle(cornerRadius: R)
+                            .fill(Color.black)
+                            .frame(width: screenWidth, height: 50))
                     Spacer()
                 }
-                .padding(ContentView().toolbar())
+                .padding(.top, (UIApplication
+                    .shared
+                    .connectedScenes
+                    .flatMap {($0 as? UIWindowScene)?.windows ?? [] }
+                    .first {$0.isKeyWindow}?.safeAreaInsets.top)! + CGFloat(10))
             }
             .toolbarBackground(Color.black, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
