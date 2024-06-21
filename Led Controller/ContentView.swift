@@ -10,6 +10,7 @@ let R:CGFloat = 30
 let screenRect = UIScreen.main.bounds
 let screenWidth = screenRect.size.width
 let screenHeight = screenRect.size.height
+
 struct ContentView: View
 {
     var body: some View 
@@ -21,19 +22,9 @@ struct ContentView: View
                 Image("background")
                     .resizable()
                     .aspectRatio(contentMode: .fill)
-                VStack
-                {
-                    Text("Placeholder")
-                        .background(RoundedRectangle(cornerRadius: R)
-                            .fill(Color.black)
-                            .frame(width: screenWidth, height: 50))
-                    Spacer()
-                }
-                .padding(.top, (UIApplication
-                    .shared
-                    .connectedScenes
-                    .flatMap {($0 as? UIWindowScene)?.windows ?? [] }
-                    .first {$0.isKeyWindow}?.safeAreaInsets.top)! + CGFloat(10))
+                
+                MainUI()
+                
             }
             .toolbarBackground(Color.black, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
@@ -52,6 +43,20 @@ struct ContentView: View
                         ))
                 }
             }
+        }
+    }
+}
+
+struct MainUI: View
+{
+    var body: some View 
+    {
+        VStack(alignment: .leading)
+        {
+            Text("Placeholder")
+                .background(RoundedRectangle(cornerRadius: R)
+                    .fill(Color.black)
+                    .frame(width: screenWidth/2, height: 40))
         }
     }
 }
