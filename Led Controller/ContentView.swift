@@ -6,14 +6,21 @@
 //
 
 import SwiftUI
-let R:CGFloat = 30
+//Standard Roundness of shapes
+private let R:CGFloat = 15
+//Standard Opacity of background shapes
+private let O:CGFloat = 0.5
+//Variables for recording screen bounds for some placement calculations. Not to be relied on.
 let screenRect = UIScreen.main.bounds
 let screenWidth = screenRect.size.width
 let screenHeight = screenRect.size.height
 
 struct ContentView: View
 {
-    var body: some View 
+    //Animation variables
+    @State private var animateHeading = false
+    
+    var body: some View
     {
         NavigationStack
         {
@@ -22,9 +29,16 @@ struct ContentView: View
                 Image("background")
                     .resizable()
                     .aspectRatio(contentMode: .fill)
-                
-                MainUI()
-                
+                    .blur(radius: R)
+                Rectangle()
+                    .fill(Color.white)
+                    .opacity(0.25)
+                VStack
+                {
+                    Spacer().frame(height: 80)
+                    MainUI()
+                    Spacer()
+                }
             }
             .toolbarBackground(Color.black, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
@@ -33,14 +47,28 @@ struct ContentView: View
             {
                 ToolbarItem(placement: .principal)
                 {
-                    Text("LED Controller")
-                        .font(.largeTitle)
-                        .accessibilityAddTraits(.isHeader)
-                        .foregroundStyle(LinearGradient(
+                    ZStack
+                    {
+                        LinearGradient(
                                 colors: [.blue, .green, .brown, .pink],
                                 startPoint: .leading,
-                                endPoint: .trailing
-                        ))
+                                endPoint: .trailing)
+                        .offset(x:animateHeading ? 0 : -screenWidth)
+                        .animation(.linear(duration: 2.0).repeatForever(autoreverses: false), value: animateHeading)
+                        Text("LED Controller")
+                            .font(.largeTitle)
+                            .accessibilityAddTraits(.isHeader)
+                            .mask(LinearGradient(
+                                    colors: [.blue, .green, .brown, .pink],
+                                    startPoint: .leading,
+                                    endPoint: .trailing)
+                                .offset(x:animateHeading ? screenWidth : 0)
+                                .animation(.linear(duration: 2.0).repeatForever(autoreverses: false), value: animateHeading))
+                    }
+                    .onAppear(perform:
+                    {
+                        animateHeading.toggle()
+                    })
                 }
             }
         }
@@ -53,10 +81,12 @@ struct MainUI: View
     {
         VStack(alignment: .leading)
         {
-            Text("Placeholder")
+            Text("Connection Status: " + status)
+                .foregroundColor(Color.black)
+                .padding()
                 .background(RoundedRectangle(cornerRadius: R)
-                    .fill(Color.black)
-                    .frame(width: screenWidth/2, height: 40))
+                    .fill(Color.gray)
+                    .opacity(O))
         }
     }
 }

@@ -2,14 +2,19 @@
 //  Led_ControllerApp.swift
 //  Led Controller
 //
-//  Created by Prabhu G on 6/15/24.
+//  Created by Krish Prabhu on 6/15/24.
 //
 
 import SwiftUI
 
+//Status variable to display
+var status = "Not Transmitting"
+
 @main
-struct Led_ControllerApp: App {
-    var body: some Scene {
+struct Led_ControllerApp: App 
+{
+    var body: some Scene 
+    {
         WindowGroup {
             ContentView()
         }
