@@ -9,7 +9,7 @@ import SwiftUI
 //Standard Roundness of shapes
 private let R:CGFloat = 15
 //Standard Opacity of background shapes
-private let O:CGFloat = 0.5
+private let O:CGFloat = 0.6
 //Variables for recording screen bounds for some placement calculations. Not to be relied on.
 let screenRect = UIScreen.main.bounds
 let screenWidth = screenRect.size.width
@@ -32,10 +32,10 @@ struct ContentView: View
                     .blur(radius: R)
                 Rectangle()
                     .fill(Color.white)
-                    .opacity(0.25)
+                    .opacity(0.15)
                 VStack
                 {
-                    Spacer().frame(height: 80)
+                    Spacer().frame(height: 20)
                     MainUI()
                     Spacer()
                 }
@@ -48,19 +48,20 @@ struct ContentView: View
                 ToolbarItem(placement: .principal)
                 {
                     LinearGradient(
-                        colors: [.blue, .green, .brown, .pink],
+                        colors: [.blue, .green, .brown, .pink, .blue, .green, .brown, .pink, .blue, .green, .brown, .pink],
                         startPoint: .leading,
                         endPoint: .trailing)
-                        .offset(x:animateHeading ? screenWidth : 0)
-                        .animation(.linear(duration: 5.0).repeatForever(autoreverses: true), value: animateHeading)
-                        .mask(Text("LED Controller")
+                        .frame(width: screenWidth*3)
+                        .offset(x:animateHeading ? 0 : -screenWidth)
+                        .mask(
+                            Text("LED Controller")
                             .font(.largeTitle)
                             .accessibilityAddTraits(.isHeader))
-                        .onAppear(perform:
-                        {
-                            animateHeading.toggle()
-                        }
-                    )
+                        .animation(.linear(duration: 5.0).repeatForever(autoreverses: false), value: animateHeading)
+                    .onAppear(perform:
+                    {
+                        animateHeading.toggle()
+                    })
                 }
             }
         }
@@ -71,15 +72,12 @@ struct MainUI: View
 {
     var body: some View 
     {
-        VStack(alignment: .leading)
-        {
-            Text("Connection Status: " + status)
-                .foregroundColor(Color.black)
-                .padding()
-                .background(RoundedRectangle(cornerRadius: R)
-                    .fill(Color.gray)
-                    .opacity(O))
-        }
+        Text("Connection Status: " + status)
+            .foregroundColor(Color.black)
+            .padding()
+            .background(RoundedRectangle(cornerRadius: R)
+                .fill(Color.gray)
+                .opacity(O))
     }
 }
 
