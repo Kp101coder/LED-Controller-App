@@ -47,28 +47,20 @@ struct ContentView: View
             {
                 ToolbarItem(placement: .principal)
                 {
-                    ZStack
-                    {
-                        LinearGradient(
-                                colors: [.blue, .green, .brown, .pink],
-                                startPoint: .leading,
-                                endPoint: .trailing)
-                        .offset(x:animateHeading ? 0 : -screenWidth)
-                        .animation(.linear(duration: 2.0).repeatForever(autoreverses: false), value: animateHeading)
-                        Text("LED Controller")
+                    LinearGradient(
+                        colors: [.blue, .green, .brown, .pink],
+                        startPoint: .leading,
+                        endPoint: .trailing)
+                        .offset(x:animateHeading ? screenWidth : 0)
+                        .animation(.linear(duration: 5.0).repeatForever(autoreverses: true), value: animateHeading)
+                        .mask(Text("LED Controller")
                             .font(.largeTitle)
-                            .accessibilityAddTraits(.isHeader)
-                            .mask(LinearGradient(
-                                    colors: [.blue, .green, .brown, .pink],
-                                    startPoint: .leading,
-                                    endPoint: .trailing)
-                                .offset(x:animateHeading ? screenWidth : 0)
-                                .animation(.linear(duration: 2.0).repeatForever(autoreverses: false), value: animateHeading))
-                    }
-                    .onAppear(perform:
-                    {
-                        animateHeading.toggle()
-                    })
+                            .accessibilityAddTraits(.isHeader))
+                        .onAppear(perform:
+                        {
+                            animateHeading.toggle()
+                        }
+                    )
                 }
             }
         }
