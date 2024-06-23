@@ -10,6 +10,8 @@ import SwiftUI
 private let R:CGFloat = 15
 //Standard Opacity of background shapes
 private let O:CGFloat = 0.6
+//Standard Padding of objects within the switch editing containers
+private let P:CGFloat = 30
 //Variables for recording screen bounds for some placement calculations. Not to be relied on.
 let screenRect = UIScreen.main.bounds
 let screenWidth = screenRect.size.width
@@ -70,7 +72,11 @@ struct ContentView: View
 
 struct MainUI: View
 {
-    var body: some View 
+    //button states
+    @State var button1On = false
+    @State var button2On = false
+    @State var button3On = false
+    var body: some View
     {
         Text("Connection Status: " + status)
             .foregroundColor(Color.black)
@@ -78,6 +84,33 @@ struct MainUI: View
             .background(RoundedRectangle(cornerRadius: R)
                 .fill(Color.gray)
                 .opacity(O))
+        HStack
+        {
+            RoundedRectangle(cornerRadius: R)
+                    .fill(Color.gray)
+                    .opacity(O)
+                    .padding()
+                    .overlay(VStack{
+                        Label(
+                            title: { Text("Switch 1") },
+                            icon: { Image(systemName: "switch.2") }
+                        ).padding(P)
+                        
+                        Toggle(
+                                "Use Image",
+                                systemImage: "photo",
+                                isOn: $button1On
+                        ).padding(P)
+                    })
+            TextEditor(text: .constant("Edit Text"))
+                .foregroundColor(.blue)
+                .padding(P)
+                
+                .background(RoundedRectangle(cornerRadius: R)
+                    .fill(Color.gray)
+                    .opacity(O)
+                    .padding())
+        }
     }
 }
 
