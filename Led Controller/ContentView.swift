@@ -102,14 +102,28 @@ struct MainUI: View
                                 isOn: $button1On
                         ).padding(P)
                     })
-            TextEditor(text: .constant("Edit Text"))
-                .foregroundColor(.blue)
-                .padding(P)
+            ZStack {
+                HStack {
+                    Text(text)
+                        .font(.system(size: 22).bold())
+                        .foregroundStyle(LinearGradient(
+                            colors: [.blue, .green, .brown, .pink],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        ))
+                        .padding(.leading, 10)
+                    Spacer()
+                }
                 
-                .background(RoundedRectangle(cornerRadius: R)
-                    .fill(Color.gray)
-                    .opacity(O)
-                    .padding())
+                TextField("Add your text here...", text: $text)
+                    .font(.system(size: 22).bold())
+                    .foregroundColor(.clear)
+                    .padding(10)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.gray, lineWidth: 1.3)
+                    )
+            }
         }
     }
 }
