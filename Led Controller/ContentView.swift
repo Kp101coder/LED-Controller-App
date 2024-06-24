@@ -90,7 +90,7 @@ struct MainUI: View
                 .opacity(O))
         HStack
         {
-            /*RoundedRectangle(cornerRadius: R)
+            RoundedRectangle(cornerRadius: R)
                     .fill(Color.gray)
                     .opacity(O)
                     .padding()
@@ -99,41 +99,46 @@ struct MainUI: View
                             title: { Text("Switch 1") },
                             icon: { Image(systemName: "switch.2") }
                         ).padding(P)
-                        
                         Toggle(
                                 "Use Image",
                                 systemImage: "photo",
-                                isOn: $button1On
-                        ).padding(P)
-                    })*/
+                                isOn: $button1On).padding(P)
+                    })
             ZStack
             {
-                HStack 
+                HStack
                 {
                     Text(button1Text)
                         .font(.system(size: 22).bold())
                         .foregroundStyle(LinearGradient(
                             colors: [.blue, .green, .brown, .pink],
                             startPoint: .leading,
-                            endPoint: .trailing
-                        ))
-                        .padding(.leading, 10)
+                            endPoint: .trailing))
                     Spacer()
                 }
-                TextField("Add you Text here... ", text: $button1Text)
-                    .font(.system(size: 22).bold())
-                    .foregroundColor(.clear)
-                    //.background(.clear)
-                    //.scrollContentBackground(.hidden)
-                    .padding(10)
-                    
-                    /*.overlay(
-                        RoundedRectangle(cornerRadius: R)
-                            .fill(Color.gray)
-                            .opacity(O)
-                    )*/
+                RoundedRectangle(cornerRadius: R)
+                    .fill(Color.gray)
+                    .opacity(O)
+                    .overlay(
+                        TextEditor(text: $button1Text)
+                            .font(.system(size: 22).bold())
+                            .foregroundColor(.clear)
+                            .padding(.leading, 10)
+                            .scrollContentBackground(.hidden)
+                            .padding(10)
+                            .onTapGesture 
+                            {
+                                dismissKeyboard()
+                            })
             }.padding(P)
         }
+        .onTapGesture {
+            dismissKeyboard()
+        }
+    }
+    private func dismissKeyboard()
+    {
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
 
