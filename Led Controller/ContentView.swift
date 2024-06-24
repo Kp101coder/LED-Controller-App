@@ -79,13 +79,21 @@ struct ContentView: View
 struct MainUI: View
 {
     //Image toggle button states
-    @State var button1On = false
-    @State var button2On = false
-    @State var button3On = false
+    @State var imageButton1:Bool = false
+    @State var imageButton2:Bool = false
+    @State var imageButton3:Bool = false
     //Text input states
     @State var button1Text:String = ""
     @State var button2Text:String = ""
     @State var button3Text:String = ""
+    //Focused State for hiding edit text
+    @FocusState var inFocus: Int?
+    //Color Input State and array
+    @State var switch1Colors:[Double] = [0.0,0.0,0.0]
+    @State var val:Double = 0.0
+    @State var rainbowButton1:Bool = false
+    @State var rainbowButton2:Bool = false
+    @State var rainbowButton3:Bool = false
     var body: some View
     {
         //First switch change options
@@ -95,17 +103,39 @@ struct MainUI: View
                     .fill(Color.gray)
                     .opacity(O)
                     .padding()
-                    .overlay(VStack{
-                        Label(
-                            title: { Text("Switch 1") },
-                            icon: { Image(systemName: "switch.2") }
-                        ).padding(P)
-                        Toggle(
-                                "Image",
-                                systemImage: "photo",
-                                isOn: $button1On).padding(P)
-                    })
-            ZStack 
+                    .overlay(
+                        VStack
+                        {
+                            Label(
+                                title: { Text("Switch 1") },
+                                icon: { Image(systemName: "switch.2") }
+                            ).padding(P)
+                            if(!imageButton1)
+                            {
+                                if(!rainbowButton1)
+                                {
+                                    /*HStack
+                                    {
+                                        TextField(
+                                            "Placeholder",
+                                            value: $val,
+                                            format: .number
+                                        ).padding()
+                                    }*/
+                                }
+                                Toggle(
+                                        "Raindow",
+                                        systemImage: "rainbow",
+                                        isOn: $rainbowButton1
+                                ).padding(P)
+                            }
+                            Toggle(
+                                    "Image",
+                                    systemImage: "photo",
+                                    isOn: $imageButton1
+                            ).padding(P)
+                        })
+            ZStack
             {
                 RoundedRectangle(cornerRadius: R)
                     .fill(Color.gray)
@@ -120,17 +150,18 @@ struct MainUI: View
                                     startPoint: .leading,
                                     endPoint: .trailing))
                                 .padding(P / 2)
-                                .opacity(button1Text.isEmpty ? 0 : 1) // Hide the gradient text when there's no text
+                                .opacity(button1Text.isEmpty ? 0 : 1)
                             
-                            TextEditor(text: $button1Text)
+                            TextEditor(text: $button1Text).id(1)
+                                .focused($inFocus, equals: 1)
                                 .font(.system(size: 22).bold())
-                                .foregroundColor(.clear)
+                                .foregroundColor(inFocus == 1 ? .black : .clear)
                                 .padding(P / 2)
                                 .scrollContentBackground(.hidden)
                                 .onTapGesture {
                                     dismissKeyboard()
                                 }
-                        }
+                        }.ignoresSafeArea(.keyboard)
                     )
             }
             .padding(P / 2)
@@ -140,106 +171,9 @@ struct MainUI: View
             }
         }
         //Second switch change options
-        HStack
-        {
-            RoundedRectangle(cornerRadius: R)
-                    .fill(Color.gray)
-                    .opacity(O)
-                    .padding()
-                    .overlay(VStack{
-                        Label(
-                            title: { Text("Switch 2") },
-                            icon: { Image(systemName: "switch.2") }
-                        ).padding(P)
-                        Toggle(
-                                "Image",
-                                systemImage: "photo",
-                                isOn: $button2On).padding(P)
-                    })
-            ZStack
-            {
-                HStack
-                {
-                    VStack
-                    {
-                        Text(button2Text)
-                            .font(.system(size: 22).bold())
-                            .foregroundStyle(LinearGradient(
-                                colors: [.blue, .green, .brown, .pink],
-                                startPoint: .leading,
-                                endPoint: .trailing))
-                            .padding(P)
-                        Spacer()
-                    }
-                    Spacer()
-                }
-                RoundedRectangle(cornerRadius: R)
-                    .fill(Color.gray)
-                    .opacity(O)
-                    .overlay(
-                        TextEditor(text: $button2Text)
-                            .font(.system(size: 22).bold())
-                            .foregroundColor(.clear)
-                            .padding(.leading, 10)
-                            .scrollContentBackground(.hidden)
-                            .onTapGesture
-                            {
-                                dismissKeyboard()
-                            })
-            }.padding(P/2)
-        }
-        .onTapGesture {
-            dismissKeyboard()
-        }
+        
         //Third switch change options
-        HStack
-        {
-            RoundedRectangle(cornerRadius: R)
-                    .fill(Color.gray)
-                    .opacity(O)
-                    .padding()
-                    .overlay(VStack{
-                        Label(
-                            title: { Text("Switch 3") },
-                            icon: { Image(systemName: "switch.2") }
-                        ).padding(P)
-                        Toggle(
-                                "Image",
-                                systemImage: "photo",
-                                isOn: $button3On).padding(P)
-                    })
-            ZStack
-            {
-                HStack
-                {
-                    VStack
-                    {
-                        Text(button3Text)
-                            .font(.system(size: 22).bold())
-                            .foregroundStyle(LinearGradient(
-                                colors: [.blue, .green, .brown, .pink],
-                                startPoint: .leading,
-                                endPoint: .trailing))
-                            .padding(P)
-                        Spacer()
-                    }
-                    Spacer()
-                }
-                RoundedRectangle(cornerRadius: R)
-                    .fill(Color.gray)
-                    .opacity(O)
-                    .overlay(
-                        TextEditor(text: $button3Text)
-                            .font(.system(size: 22).bold())
-                            .foregroundColor(.clear)
-                            .padding(.leading, 10)
-                            .scrollContentBackground(.hidden)
-                            .onTapGesture
-                            {
-                                dismissKeyboard()
-                            })
-            }.padding(P/2)
-        }
+        
         .onTapGesture {
             dismissKeyboard()
         }
