@@ -13,7 +13,7 @@ var status = "Not Transmitting"
 @main
 struct Led_ControllerApp: App 
 {
-    var body: some Scene 
+    var body: some Scene
     {
         WindowGroup {
             ContentView()

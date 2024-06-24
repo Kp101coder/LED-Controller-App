@@ -38,6 +38,12 @@ struct ContentView: View
                 VStack
                 {
                     Spacer().frame(height: 20)
+                    Text("Connection Status: " + status)
+                        .foregroundColor(Color.black)
+                        .padding()
+                        .background(RoundedRectangle(cornerRadius: R)
+                            .fill(Color.gray)
+                            .opacity(O))
                     MainUI()
                     Spacer()
                 }
@@ -82,12 +88,7 @@ struct MainUI: View
     @State var button3Text:String = ""
     var body: some View
     {
-        Text("Connection Status: " + status)
-            .foregroundColor(Color.black)
-            .padding()
-            .background(RoundedRectangle(cornerRadius: R)
-                .fill(Color.gray)
-                .opacity(O))
+        //First switch change options
         HStack
         {
             RoundedRectangle(cornerRadius: R)
@@ -100,7 +101,7 @@ struct MainUI: View
                             icon: { Image(systemName: "switch.2") }
                         ).padding(P)
                         Toggle(
-                                "Use Image",
+                                "Image",
                                 systemImage: "photo",
                                 isOn: $button1On).padding(P)
                     })
@@ -108,12 +109,17 @@ struct MainUI: View
             {
                 HStack
                 {
-                    Text(button1Text)
-                        .font(.system(size: 22).bold())
-                        .foregroundStyle(LinearGradient(
-                            colors: [.blue, .green, .brown, .pink],
-                            startPoint: .leading,
-                            endPoint: .trailing))
+                    VStack
+                    {
+                        Text(button1Text)
+                            .font(.system(size: 22).bold())
+                            .foregroundStyle(LinearGradient(
+                                colors: [.blue, .green, .brown, .pink],
+                                startPoint: .leading,
+                                endPoint: .trailing))
+                            .padding(P/2)
+                        Spacer()
+                    }
                     Spacer()
                 }
                 RoundedRectangle(cornerRadius: R)
@@ -122,15 +128,118 @@ struct MainUI: View
                     .overlay(
                         TextEditor(text: $button1Text)
                             .font(.system(size: 22).bold())
-                            .foregroundColor(.clear)
-                            .padding(.leading, 10)
+                            .foregroundColor(.black)
+                            .padding(P/2)
                             .scrollContentBackground(.hidden)
-                            .padding(10)
-                            .onTapGesture 
+                            .onTapGesture
                             {
                                 dismissKeyboard()
                             })
-            }.padding(P)
+            }.padding(P/2)
+        }
+        .onTapGesture {
+            dismissKeyboard()
+        }
+        //Second switch change options
+        HStack
+        {
+            RoundedRectangle(cornerRadius: R)
+                    .fill(Color.gray)
+                    .opacity(O)
+                    .padding()
+                    .overlay(VStack{
+                        Label(
+                            title: { Text("Switch 2") },
+                            icon: { Image(systemName: "switch.2") }
+                        ).padding(P)
+                        Toggle(
+                                "Image",
+                                systemImage: "photo",
+                                isOn: $button2On).padding(P)
+                    })
+            ZStack
+            {
+                HStack
+                {
+                    VStack
+                    {
+                        Text(button2Text)
+                            .font(.system(size: 22).bold())
+                            .foregroundStyle(LinearGradient(
+                                colors: [.blue, .green, .brown, .pink],
+                                startPoint: .leading,
+                                endPoint: .trailing))
+                            .padding(P)
+                        Spacer()
+                    }
+                    Spacer()
+                }
+                RoundedRectangle(cornerRadius: R)
+                    .fill(Color.gray)
+                    .opacity(O)
+                    .overlay(
+                        TextEditor(text: $button2Text)
+                            .font(.system(size: 22).bold())
+                            .foregroundColor(.clear)
+                            .padding(.leading, 10)
+                            .scrollContentBackground(.hidden)
+                            .onTapGesture
+                            {
+                                dismissKeyboard()
+                            })
+            }.padding(P/2)
+        }
+        .onTapGesture {
+            dismissKeyboard()
+        }
+        //Third switch change options
+        HStack
+        {
+            RoundedRectangle(cornerRadius: R)
+                    .fill(Color.gray)
+                    .opacity(O)
+                    .padding()
+                    .overlay(VStack{
+                        Label(
+                            title: { Text("Switch 3") },
+                            icon: { Image(systemName: "switch.2") }
+                        ).padding(P)
+                        Toggle(
+                                "Image",
+                                systemImage: "photo",
+                                isOn: $button3On).padding(P)
+                    })
+            ZStack
+            {
+                HStack
+                {
+                    VStack
+                    {
+                        Text(button3Text)
+                            .font(.system(size: 22).bold())
+                            .foregroundStyle(LinearGradient(
+                                colors: [.blue, .green, .brown, .pink],
+                                startPoint: .leading,
+                                endPoint: .trailing))
+                            .padding(P)
+                        Spacer()
+                    }
+                    Spacer()
+                }
+                RoundedRectangle(cornerRadius: R)
+                    .fill(Color.gray)
+                    .opacity(O)
+                    .overlay(
+                        TextEditor(text: $button3Text)
+                            .font(.system(size: 22).bold())
+                            .foregroundColor(.clear)
+                            .padding(.leading, 10)
+                            .scrollContentBackground(.hidden)
+                            .onTapGesture
+                            {
+                                dismissKeyboard()
+                            })
+            }.padding(P/2)
         }
         .onTapGesture {
             dismissKeyboard()
