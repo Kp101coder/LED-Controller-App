@@ -105,40 +105,39 @@ struct MainUI: View
                                 systemImage: "photo",
                                 isOn: $button1On).padding(P)
                     })
-            ZStack
+            ZStack 
             {
-                HStack
-                {
-                    VStack
-                    {
-                        Text(button1Text)
-                            .font(.system(size: 22).bold())
-                            .foregroundStyle(LinearGradient(
-                                colors: [.blue, .green, .brown, .pink],
-                                startPoint: .leading,
-                                endPoint: .trailing))
-                            .padding(P/2)
-                        Spacer()
-                    }
-                    Spacer()
-                }
                 RoundedRectangle(cornerRadius: R)
                     .fill(Color.gray)
                     .opacity(O)
                     .overlay(
-                        TextEditor(text: $button1Text)
-                            .font(.system(size: 22).bold())
-                            .foregroundColor(.black)
-                            .padding(P/2)
-                            .scrollContentBackground(.hidden)
-                            .onTapGesture
-                            {
-                                dismissKeyboard()
-                            })
-            }.padding(P/2)
-        }
-        .onTapGesture {
-            dismissKeyboard()
+                        ZStack(alignment: .topLeading) 
+                        {
+                            Text(button1Text)
+                                .font(.system(size: 22).bold())
+                                .foregroundStyle(LinearGradient(
+                                    colors: [.blue, .green, .brown, .pink],
+                                    startPoint: .leading,
+                                    endPoint: .trailing))
+                                .padding(P / 2)
+                                .opacity(button1Text.isEmpty ? 0 : 1) // Hide the gradient text when there's no text
+                            
+                            TextEditor(text: $button1Text)
+                                .font(.system(size: 22).bold())
+                                .foregroundColor(.clear)
+                                .padding(P / 2)
+                                .scrollContentBackground(.hidden)
+                                .onTapGesture {
+                                    dismissKeyboard()
+                                }
+                        }
+                    )
+            }
+            .padding(P / 2)
+            .onTapGesture 
+            {
+                dismissKeyboard()
+            }
         }
         //Second switch change options
         HStack
