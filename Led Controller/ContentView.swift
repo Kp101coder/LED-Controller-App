@@ -72,10 +72,14 @@ struct ContentView: View
 
 struct MainUI: View
 {
-    //button states
+    //Image toggle button states
     @State var button1On = false
     @State var button2On = false
     @State var button3On = false
+    //Text input states
+    @State var button1Text:String = ""
+    @State var button2Text:String = ""
+    @State var button3Text:String = ""
     var body: some View
     {
         Text("Connection Status: " + status)
@@ -86,7 +90,7 @@ struct MainUI: View
                 .opacity(O))
         HStack
         {
-            RoundedRectangle(cornerRadius: R)
+            /*RoundedRectangle(cornerRadius: R)
                     .fill(Color.gray)
                     .opacity(O)
                     .padding()
@@ -101,10 +105,12 @@ struct MainUI: View
                                 systemImage: "photo",
                                 isOn: $button1On
                         ).padding(P)
-                    })
-            ZStack {
-                HStack {
-                    Text(text)
+                    })*/
+            ZStack
+            {
+                HStack 
+                {
+                    Text(button1Text)
                         .font(.system(size: 22).bold())
                         .foregroundStyle(LinearGradient(
                             colors: [.blue, .green, .brown, .pink],
@@ -114,16 +120,19 @@ struct MainUI: View
                         .padding(.leading, 10)
                     Spacer()
                 }
-                
-                TextField("Add your text here...", text: $text)
+                TextField("Add you Text here... ", text: $button1Text)
                     .font(.system(size: 22).bold())
                     .foregroundColor(.clear)
+                    //.background(.clear)
+                    //.scrollContentBackground(.hidden)
                     .padding(10)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(Color.gray, lineWidth: 1.3)
-                    )
-            }
+                    
+                    /*.overlay(
+                        RoundedRectangle(cornerRadius: R)
+                            .fill(Color.gray)
+                            .opacity(O)
+                    )*/
+            }.padding(P)
         }
     }
 }
