@@ -27,16 +27,7 @@ struct ContentView: View {
                     .ignoresSafeArea(.all)
                 VStack {
                     Spacer().frame(height: 20)
-                    Text("Connection Status: Connected") // Placeholder for status
-                        .foregroundColor(Color.black)
-                        .padding()
-                        .background(RoundedRectangle(cornerRadius: R)
-                            .fill(Color.gray)
-                            .opacity(O))
                     MainUI()
-                    Button("Transmit") {
-                        // Transmit
-                    }
                     .padding()
                     .foregroundColor(Color.blue)
                     .background(RoundedRectangle(cornerRadius: R)
@@ -90,8 +81,21 @@ struct MainUI: View {
     @State var rainbowButton1: Bool = false
     @State var rainbowButton2: Bool = false
     @State var rainbowButton3: Bool = false
+    //Image Holders
+    @State var image1:Image?
+    @State var image2:Image?
+    @State var image3:Image?
+    //Bluetooth handlers
+    @State var status = ""
+    @StateObject private var bluetoothManager = BluetoothManager()
     
     var body: some View {
+        Text("Connection Status: Connected")
+            .foregroundColor(Color.black)
+            .padding()
+            .background(RoundedRectangle(cornerRadius: R)
+                .fill(Color.gray)
+                .opacity(O))
         ScrollView {
             // First switch change options
             addSwitch(switchNumber: 1, buttonText: $button1Text, imageButton: $imageButton1, rainbowButton: $rainbowButton1, rgb: $switch1Colors).frame(minHeight: 500)
@@ -99,6 +103,10 @@ struct MainUI: View {
             addSwitch(switchNumber: 2, buttonText: $button2Text, imageButton: $imageButton2, rainbowButton: $rainbowButton2, rgb: $switch2Colors).frame(minHeight: 500)
             // Third switch change options
             addSwitch(switchNumber: 3, buttonText: $button3Text, imageButton: $imageButton3, rainbowButton: $rainbowButton3, rgb: $switch3Colors).frame(minHeight: 500)
+        }
+        Button("Transmit") 
+        {
+            // Transmit
         }
     }
 }
@@ -218,27 +226,35 @@ struct addSwitch: View {
                 .fill(Color.gray)
                 .opacity(O)
                 .overlay(
-                    ZStack(alignment: .topLeading) {
-                        TextEditor(text: $buttonText).id(1)
-                            .focused($inFocus, equals: 1)
-                            .font(.system(size: 22).bold())
-                            .foregroundColor(rainbowButton ? (inFocus == 1 ? .white : .clear) : currentColor)
-                            .scrollContentBackground(.hidden)
-                            .background(RoundedRectangle(cornerRadius: R)
-                                .fill(Color.black))
-                            .padding(15)
-                            .onTapGesture {
-                                dismissKeyboard()
-                            }
-                        if (rainbowButton) {
-                            Text(buttonText)
+                    ZStack(alignment: .topLeading) 
+                    {
+                        if(!imageButton)
+                        {
+                            TextEditor(text: $buttonText).id(1)
+                                .focused($inFocus, equals: 1)
                                 .font(.system(size: 22).bold())
-                                .foregroundStyle(LinearGradient(
-                                    colors: [.blue, .green, .brown, .pink],
-                                    startPoint: .leading,
-                                    endPoint: .trailing))
-                                .padding(20)
-                                .opacity(inFocus != 1 ? 1 : 0)
+                                .foregroundColor(rainbowButton ? (inFocus == 1 ? .white : .clear) : currentColor)
+                                .scrollContentBackground(.hidden)
+                                .background(RoundedRectangle(cornerRadius: R)
+                                    .fill(Color.black))
+                                .padding(15)
+                                .onTapGesture {
+                                    dismissKeyboard()
+                                }
+                            if (rainbowButton) {
+                                Text(buttonText)
+                                    .font(.system(size: 22).bold())
+                                    .foregroundStyle(LinearGradient(
+                                        colors: [.blue, .green, .brown, .pink],
+                                        startPoint: .leading,
+                                        endPoint: .trailing))
+                                    .padding(20)
+                                    .opacity(inFocus != 1 ? 1 : 0)
+                            }
+                        }
+                        else
+                        {
+                            
                         }
                     }
                 )

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7483221E2C3356A4008F9973 /* BluetoothManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7483221D2C3356A4008F9973 /* BluetoothManager.swift */; };
 		748458B82C1E663000FF47FF /* Led_ControllerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 748458B72C1E663000FF47FF /* Led_ControllerApp.swift */; };
 		748458BA2C1E663000FF47FF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 748458B92C1E663000FF47FF /* ContentView.swift */; };
 		748458BC2C1E663300FF47FF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 748458BB2C1E663300FF47FF /* Assets.xcassets */; };
@@ -14,6 +15,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		7483221D2C3356A4008F9973 /* BluetoothManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothManager.swift; sourceTree = "<group>"; };
 		748458B42C1E663000FF47FF /* Led Controller.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Led Controller.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		748458B72C1E663000FF47FF /* Led_ControllerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Led_ControllerApp.swift; sourceTree = "<group>"; };
 		748458B92C1E663000FF47FF /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -55,6 +57,7 @@
 				748458B92C1E663000FF47FF /* ContentView.swift */,
 				748458BB2C1E663300FF47FF /* Assets.xcassets */,
 				748458BD2C1E663300FF47FF /* Preview Content */,
+				7483221D2C3356A4008F9973 /* BluetoothManager.swift */,
 			);
 			path = "Led Controller";
 			sourceTree = "<group>";
@@ -138,6 +141,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				748458BA2C1E663000FF47FF /* ContentView.swift in Sources */,
+				7483221E2C3356A4008F9973 /* BluetoothManager.swift in Sources */,
 				748458B82C1E663000FF47FF /* Led_ControllerApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

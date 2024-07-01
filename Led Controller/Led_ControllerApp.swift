@@ -6,9 +6,7 @@
 //
 
 import SwiftUI
-
-//Status variable to display
-var status = "Not Transmitting"
+import CoreBluetooth
 
 @main
 struct Led_ControllerApp: App 
