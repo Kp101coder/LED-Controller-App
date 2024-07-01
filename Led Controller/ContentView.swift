@@ -28,12 +28,6 @@ struct ContentView: View {
                 VStack {
                     Spacer().frame(height: 20)
                     MainUI()
-                    .padding()
-                    .foregroundColor(Color.blue)
-                    .background(RoundedRectangle(cornerRadius: R)
-                        .fill(Color.black)
-                        .opacity(O)
-                        .frame(width: 100))
                     Spacer()
                 }
             }
@@ -86,11 +80,11 @@ struct MainUI: View {
     @State var image2:Image?
     @State var image3:Image?
     //Bluetooth handlers
-    @State var status = ""
+    @State var status = "Not Connected"
     @StateObject private var bluetoothManager = BluetoothManager()
     
     var body: some View {
-        Text("Connection Status: Connected")
+        Text("Connection Status: " + status)
             .foregroundColor(Color.black)
             .padding()
             .background(RoundedRectangle(cornerRadius: R)
@@ -108,6 +102,12 @@ struct MainUI: View {
         {
             // Transmit
         }
+        .padding()
+        .foregroundColor(Color.blue)
+        .background(RoundedRectangle(cornerRadius: R)
+            .fill(Color.black)
+            .opacity(O)
+            .frame(width: 100))
     }
 }
 

@@ -1,17 +1,13 @@
-//
-//  BluetoothManager.swift
-//  Led Controller
-//
-//  Created by Krish Prabhu and ChatGPT on 7/1/24.
-//
-
 import CoreBluetooth
+import Combine
 
-class BluetoothManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
+class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     var centralManager: CBCentralManager!
     var connectedPeripheral: CBPeripheral?
     var dataCharacteristic: CBCharacteristic?
-
+    
+    @Published var isConnected = false
+    
     override init() {
         super.init()
         centralManager = CBCentralManager(delegate: self, queue: nil)
@@ -35,6 +31,7 @@ class BluetoothManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate
     }
 
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
+        isConnected = true
         peripheral.discoverServices(nil)
     }
 
@@ -63,4 +60,3 @@ class BluetoothManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate
         }
     }
 }
-

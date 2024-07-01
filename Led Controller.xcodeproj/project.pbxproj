@@ -16,6 +16,7 @@
 
 /* Begin PBXFileReference section */
 		7483221D2C3356A4008F9973 /* BluetoothManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothManager.swift; sourceTree = "<group>"; };
+		7483221F2C335BD2008F9973 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		748458B42C1E663000FF47FF /* Led Controller.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Led Controller.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		748458B72C1E663000FF47FF /* Led_ControllerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Led_ControllerApp.swift; sourceTree = "<group>"; };
 		748458B92C1E663000FF47FF /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -53,6 +54,7 @@
 		748458B62C1E663000FF47FF /* Led Controller */ = {
 			isa = PBXGroup;
 			children = (
+				7483221F2C335BD2008F9973 /* PrivacyInfo.xcprivacy */,
 				748458B72C1E663000FF47FF /* Led_ControllerApp.swift */,
 				748458B92C1E663000FF47FF /* ContentView.swift */,
 				748458BB2C1E663300FF47FF /* Assets.xcassets */,
