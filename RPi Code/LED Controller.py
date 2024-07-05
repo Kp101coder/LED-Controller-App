@@ -160,9 +160,11 @@ def register_app_cb():
 
 def register_app_error_cb(error):
     print('Failed to register application:', str(error))
+    global mainloop
     mainloop.quit()
 
 def main():
+    global mainloop
     dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
     bus = dbus.SystemBus()
     adapter = find_adapter(bus)
