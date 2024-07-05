@@ -8,7 +8,7 @@ private let O: CGFloat = 0.6
 let screenRect = UIScreen.main.bounds
 let screenWidth = screenRect.size.width
 let screenHeight = screenRect.size.height
-
+//Hello
 struct ContentView: View {
     // Animation variables
     @State private var animateHeading = false
