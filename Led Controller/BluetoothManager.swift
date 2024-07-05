@@ -36,6 +36,7 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
     }
     
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
+        print("Connected to peripheral: \(peripheral)")
         isConnected = true
         peripheral.discoverServices([serviceUUID])
     }
@@ -67,8 +68,10 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
     }
     
     func sendData(_ data: Data) {
-        if let characteristic = dataCharacteristic, let peripheral = connectedPeripheral {
+        if let characteristic = dataCharacteristic, let peripheral = connectedPeripheral 
+        {
             peripheral.writeValue(data, for: characteristic, type: CBCharacteristicWriteType.withResponse)
+            print("Data sent: \(String(data: data, encoding: .utf8) ?? "Unknown")")
+        }
     }
-}
 }
