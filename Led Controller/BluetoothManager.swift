@@ -1,5 +1,4 @@
-//Made by Krish Prabhu and ChatGPT
-//7/4/2024
+//Made by Krish Prabhu
 
 import CoreBluetooth
 import Combine
