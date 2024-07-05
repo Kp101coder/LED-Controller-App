@@ -1,77 +1,52 @@
-//Made by Krish Prabhu
-import CoreBluetooth
-import Combine
-import UIKit
+//Krish Prabhu
+import asyncio
+from bleak import BleakServer
+from bleak.backends.characteristic import BleakGATTCharacteristic
+from bleak.backends.service import BleakGATTService
 
-class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CBPeripheralDelegate {
-    var centralManager: CBCentralManager!
-    var connectedPeripheral: CBPeripheral?
-    var dataCharacteristic: CBCharacteristic?
-    
-    @Published var isConnected = false
-    @Published var receivedData: String = ""
+# Define UUIDs for the service and characteristic
+SERVICE_UUID = "12345678-1234-5678-1234-56789abcdef0"
+CHARACTERISTIC_UUID = "87654321-1234-5678-1234-56789abcdef0"
 
-    override init() {
-        super.init()
-        centralManager = CBCentralManager(delegate: self, queue: nil)
-    }
+class LEDControllerServer:
+    def __init__(self):
+        self.connected_devices = set()
 
-    func centralManagerDidUpdateState(_ central: CBCentralManager) {
-        if central.state == .poweredOn {
-            centralManager.scanForPeripherals(withServices: nil, options: nil)
-        } else {
-            print("Bluetooth is not available.")
-        }
-    }
+    async def handle_read(self, characteristic: BleakGATTCharacteristic, **kwargs):
+        return b"Hello from Raspberry Pi"
 
-    func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
-        if let name = peripheral.name, name == "LEDController" {
-            centralManager.stopScan()
-            connectedPeripheral = peripheral
-            connectedPeripheral?.delegate = self
-            centralManager.connect(peripheral, options: nil)
-        }
-    }
+    async def handle_write(self, characteristic: BleakGATTCharacteristic, data: bytearray):
+        print(f"Received data: {data.decode()}")
+        # Here you can add logic to control your LED or perform other actions
+        # based on the received data
 
-    func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
-        isConnected = true
-        peripheral.discoverServices(nil)
-    }
+    async def handle_disconnect(self, device):
+        print(f"Device {device.address} disconnected")
+        self.connected_devices.remove(device)
 
-    func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
-        if let services = peripheral.services {
-            for service in services {
-                peripheral.discoverCharacteristics(nil, for: service)
-            }
-        }
-    }
+    async def run(self):
+        server = BleakServer()
+        service = BleakGATTService(SERVICE_UUID)
+        char = BleakGATTCharacteristic(CHARACTERISTIC_UUID, read=True, write=True, notify=True)
+        char.add_descriptor(BleakGATTCharacteristic("2902", read=True, write=True))
+        service.add_characteristic(char)
+        server.add_service(service)
 
-    func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
-        if let characteristics = service.characteristics {
-            for characteristic in characteristics {
-                if characteristic.properties.contains(.write) {
-                    dataCharacteristic = characteristic
-                    // Send iPhone's name when characteristic is discovered
-                    let iphoneName = UIDevice.current.name
-                    sendData(iphoneName.data(using: .utf8)!)
-                }
-                if characteristic.properties.contains(.notify) {
-                    peripheral.setNotifyValue(true, for: characteristic)
-                }
-            }
-        }
-    }
+        char.set_read_handler(self.handle_read)
+        char.set_write_handler(self.handle_write)
 
-    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
-        if let data = characteristic.value {
-            receivedData = String(data: data, encoding: .utf8) ?? "Unknown data"
-            print("Received data: \(receivedData)")
-        }
-    }
+        await server.start()
+        print(f"Server started. Address: {server.address}")
 
-    func sendData(_ data: Data) {
-        if let characteristic = dataCharacteristic, let peripheral = connectedPeripheral {
-            peripheral.writeValue(data, for: characteristic, type: .withResponse)
-        }
-    }
-}
+        while True:
+            for device in server.connected_devices:
+                if device not in self.connected_devices:
+                    print(f"New device connected: {device.address}")
+                    self.connected_devices.add(device)
+                    server.set_disconnect_handler(device, self.handle_disconnect)
+
+            await asyncio.sleep(1)
+
+if __name__ == "__main__":
+    controller = LEDControllerServer()
+    asyncio.run(controller.run())
