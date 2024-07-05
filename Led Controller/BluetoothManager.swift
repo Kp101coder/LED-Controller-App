@@ -1,5 +1,9 @@
+//Made by Krish Prabhu and ChatGPT
+//7/4/2024
+
 import CoreBluetooth
 import Combine
+import UIKit
 
 class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     var centralManager: CBCentralManager!
@@ -7,7 +11,8 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
     var dataCharacteristic: CBCharacteristic?
     
     @Published var isConnected = false
-    
+    @Published var receivedData: String = ""
+
     override init() {
         super.init()
         centralManager = CBCentralManager(delegate: self, queue: nil)
@@ -22,7 +27,7 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
     }
 
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
-        if let name = peripheral.name, name == "RaspberryPiPico" {
+        if let name = peripheral.name, name == "LEDController" {
             centralManager.stopScan()
             connectedPeripheral = peripheral
             connectedPeripheral?.delegate = self
@@ -48,9 +53,21 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
             for characteristic in characteristics {
                 if characteristic.properties.contains(.write) {
                     dataCharacteristic = characteristic
-                    break
+                    // Send iPhone's name when characteristic is discovered
+                    let iphoneName = UIDevice.current.name
+                    sendData(iphoneName.data(using: .utf8)!)
+                }
+                if characteristic.properties.contains(.notify) {
+                    peripheral.setNotifyValue(true, for: characteristic)
                 }
             }
+        }
+    }
+
+    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
+        if let data = characteristic.value {
+            receivedData = String(data: data, encoding: .utf8) ?? "Unknown data"
+            print("Received data: \(receivedData)")
         }
     }
 

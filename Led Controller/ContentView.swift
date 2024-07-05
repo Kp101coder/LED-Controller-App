@@ -47,7 +47,8 @@ struct ContentView: View {
                                 .font(.largeTitle)
                                 .accessibilityAddTraits(.isHeader))
                         .animation(.linear(duration: 5.0).repeatForever(autoreverses: true), value: animateHeading)
-                        .onAppear {
+                        .onAppear 
+                        {
                             animateHeading.toggle()
                         }
                 }
@@ -56,7 +57,8 @@ struct ContentView: View {
     }
 }
 
-struct MainUI: View {
+struct MainUI: View 
+{
     // Image toggle button states
     @State var imageButton1: Bool = false
     @State var imageButton2: Bool = false
@@ -83,14 +85,17 @@ struct MainUI: View {
     @State var status = "Not Connected"
     @StateObject private var bluetoothManager = BluetoothManager()
     
-    var body: some View {
+    
+    var body: some View 
+    {
         Text("Connection Status: " + status)
             .foregroundColor(Color.black)
             .padding()
             .background(RoundedRectangle(cornerRadius: R)
                 .fill(Color.gray)
                 .opacity(O))
-        ScrollView {
+        ScrollView 
+        {
             // First switch change options
             addSwitch(switchNumber: 1, buttonText: $button1Text, imageButton: $imageButton1, rainbowButton: $rainbowButton1, rgb: $switch1Colors).frame(minHeight: 500)
             // Second switch change options
@@ -100,14 +105,25 @@ struct MainUI: View {
         }
         Button("Transmit") 
         {
-            // Transmit
+            if(bluetoothManager.isConnected)
+            {
+                let dataToSend = "Hello from \(UIDevice.current.name)".data(using: .utf8)!
+                bluetoothManager.sendData(dataToSend)
+            }
         }
         .padding()
-        .foregroundColor(Color.blue)
+        .foregroundColor(bluetoothManager.isConnected ? Color.blue : Color.red)
         .background(RoundedRectangle(cornerRadius: R)
             .fill(Color.black)
             .opacity(O)
             .frame(width: 100))
+        .onReceive(bluetoothManager.$isConnected)
+        { isConnected in
+            status = bluetoothManager.isConnected ? "Connected" : "Scanning"
+        }
+        .onReceive(bluetoothManager.$receivedData, perform: { _ in
+            status = bluetoothManager.receivedData
+        })
     }
 }
 
