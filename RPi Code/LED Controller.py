@@ -1,3 +1,12 @@
+Skip adapter: /org/bluez
+Traceback (most recent call last):
+  File "/home/krishpyddev/Desktop/LEDController.py", line 280, in <module>
+    main()
+  File "/home/krishpyddev/Desktop/LEDController.py", line 254, in main
+    app.add_service(LEDControllerService(bus, 0))
+  File "/home/krishpyddev/Desktop/LEDController.py", line 138, in __init__
+    Service.__init__(self, bus, index, self.LED_CONTROLLER_UUID, True)
+TypeError: __init__() missing 1 required positional argument: 'service'
 import dbus
 import dbus.exceptions
 import dbus.mainloop.glib
