@@ -1,3 +1,7 @@
+Registering GATT application...
+ERROR:dbus.service:Unable to append ({dbus.ObjectPath('/org/bluez/example/service0'): {'org.bluez.GattService1': {'UUID': '7a6307c9-5be7-4747-a8b6-51a6cb9b285c', 'Primary': True, 'Characteristics': dbus.Array([dbus.ObjectPath('/org/bluez/example/service0/char0')], signature=dbus.Signature('o'))}}, dbus.ObjectPath('/org/bluez/example/service0/char0'): {'org.bluez.GattCharacteristic1': {'Service': dbus.ObjectPath('/org/bluez/example/service0'), 'UUID': 'ddbf3449-9275-42e5-9f4f-6058fabca551', 'Flags': ['read', 'write'], 'Value': []}}},) to message with signature a{oa{sa{sv}}}: <class 'ValueError'>: Unable to guess signature from an empty list
+Failed to register application: org.bluez.Error.Failed: No object received
+
 import dbus
 import dbus.exceptions
 import dbus.mainloop.glib
