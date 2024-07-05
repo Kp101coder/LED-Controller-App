@@ -52,11 +52,6 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
         for characteristic in characteristics {
             if characteristic.uuid == characteristicUUID {
                 dataCharacteristic = characteristic
-                if characteristic.properties.contains(.write) {
-                    // Send iPhone's name when characteristic is discovered
-                    let iphoneName = UIDevice.current.name
-                    sendData(iphoneName.data(using: .utf8)!)
-                }
                 if characteristic.properties.contains(.notify) {
                     peripheral.setNotifyValue(true, for: characteristic)
                 }
