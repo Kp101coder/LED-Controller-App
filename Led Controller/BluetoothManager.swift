@@ -1,52 +1,79 @@
-//Krish Prabhu
-import asyncio
-from bleak import BleakServer
-from bleak.backends.characteristic import BleakGATTCharacteristic
-from bleak.backends.service import BleakGATTService
+//Made by Krish Prabhu
+import CoreBluetooth
+import Combine
+import UIKit
 
-# Define UUIDs for the service and characteristic
-SERVICE_UUID = "12345678-1234-5678-1234-56789abcdef0"
-CHARACTERISTIC_UUID = "87654321-1234-5678-1234-56789abcdef0"
-
-class LEDControllerServer:
-    def __init__(self):
-        self.connected_devices = set()
-
-    async def handle_read(self, characteristic: BleakGATTCharacteristic, **kwargs):
-        return b"Hello from Raspberry Pi"
-
-    async def handle_write(self, characteristic: BleakGATTCharacteristic, data: bytearray):
-        print(f"Received data: {data.decode()}")
-        # Here you can add logic to control your LED or perform other actions
-        # based on the received data
-
-    async def handle_disconnect(self, device):
-        print(f"Device {device.address} disconnected")
-        self.connected_devices.remove(device)
-
-    async def run(self):
-        server = BleakServer()
-        service = BleakGATTService(SERVICE_UUID)
-        char = BleakGATTCharacteristic(CHARACTERISTIC_UUID, read=True, write=True, notify=True)
-        char.add_descriptor(BleakGATTCharacteristic("2902", read=True, write=True))
-        service.add_characteristic(char)
-        server.add_service(service)
-
-        char.set_read_handler(self.handle_read)
-        char.set_write_handler(self.handle_write)
-
-        await server.start()
-        print(f"Server started. Address: {server.address}")
-
-        while True:
-            for device in server.connected_devices:
-                if device not in self.connected_devices:
-                    print(f"New device connected: {device.address}")
-                    self.connected_devices.add(device)
-                    server.set_disconnect_handler(device, self.handle_disconnect)
-
-            await asyncio.sleep(1)
-
-if __name__ == "__main__":
-    controller = LEDControllerServer()
-    asyncio.run(controller.run())
+class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CBPeripheralDelegate {
+    var centralManager: CBCentralManager!
+    var connectedPeripheral: CBPeripheral?
+    var dataCharacteristic: CBCharacteristic?
+    
+    @Published var isConnected = false
+    @Published var receivedData: String = ""
+    
+    // Define UUIDs
+    let serviceUUID = CBUUID(string: "12345678-1234-5678-1234-56789abcdef0")
+    let characteristicUUID = CBUUID(string: "87654321-1234-5678-1234-56789abcdef0")
+    
+    override init() {
+        super.init()
+        centralManager = CBCentralManager(delegate: self, queue: nil)
+    }
+    
+    func centralManagerDidUpdateState(_ central: CBCentralManager) {
+        if central.state == .poweredOn {
+            centralManager.scanForPeripherals(withServices: [serviceUUID], options: nil)
+        } else {
+            print("Bluetooth is not available.")
+        }
+    }
+    
+    func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
+        centralManager.stopScan()
+        connectedPeripheral = peripheral
+        connectedPeripheral?.delegate = self
+        centralManager.connect(peripheral, options: nil)
+    }
+    
+    func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
+        isConnected = true
+        peripheral.discoverServices([serviceUUID])
+    }
+    
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
+        guard let services = peripheral.services else { return }
+        for service in services {
+            peripheral.discoverCharacteristics([characteristicUUID], for: service)
+        }
+    }
+    
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
+        guard let characteristics = service.characteristics else { return }
+        for characteristic in characteristics {
+            if characteristic.uuid == characteristicUUID {
+                dataCharacteristic = characteristic
+                if characteristic.properties.contains(.write) {
+                    // Send iPhone's name when characteristic is discovered
+                    let iphoneName = UIDevice.current.name
+                    sendData(iphoneName.data(using: .utf8)!)
+                }
+                if characteristic.properties.contains(.notify) {
+                    peripheral.setNotifyValue(true, for: characteristic)
+                }
+            }
+        }
+    }
+    
+    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
+        if let data = characteristic.value {
+            receivedData = String(data: data, encoding: .utf8) ?? "Unknown data"
+            print("Received data: \(receivedData)")
+        }
+    }
+    
+    func sendData(_ data: Data) {
+        if let characteristic = dataCharacteristic, let peripheral = connectedPeruthiral {
+            peripheral.writeValue(data, for: characteristic, type: .withResponse)
+        }
+    }
+}
