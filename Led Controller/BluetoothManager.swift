@@ -12,8 +12,8 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
     @Published var receivedData: String = ""
     
     // Define UUIDs
-    let serviceUUID = CBUUID(string: "12345678-1234-5678-1234-56789abcdef0")
-    let characteristicUUID = CBUUID(string: "87654321-1234-5678-1234-56789abcdef0")
+    let serviceUUID = CBUUID(string: "7a6307c9-5be7-4747-a8b6-51a6cb9b285c")
+    let characteristicUUID = CBUUID(string: "ddbf3449-9275-42e5-9f4f-6058fabca551")
     
     override init() {
         super.init()
