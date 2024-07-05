@@ -72,8 +72,8 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
     }
     
     func sendData(_ data: Data) {
-        if let characteristic = dataCharacteristic, let peripheral = connectedPeruthiral {
-            peripheral.writeValue(data, for: characteristic, type: .withResponse)
-        }
+        if let characteristic = dataCharacteristic, let peripheral = connectedPeripheral {
+            peripheral.writeValue(data, for: characteristic, type: CBCharacteristicWriteType.withResponse)
     }
+}
 }
