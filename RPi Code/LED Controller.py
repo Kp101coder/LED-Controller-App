@@ -1,12 +1,7 @@
-Registering GATT application...
-ERROR:dbus.service:Unable to append ({dbus.ObjectPath('/org/bluez/example/service0'): {'org.bluez.GattService1': {'UUID': '7a6307c9-5be7-4747-a8b6-51a6cb9b285c', 'Primary': True, 'Characteristics': dbus.Array([dbus.ObjectPath('/org/bluez/example/service0/char0')], signature=dbus.Signature('o'))}}, dbus.ObjectPath('/org/bluez/example/service0/char0'): {'org.bluez.GattCharacteristic1': {'Service': dbus.ObjectPath('/org/bluez/example/service0'), 'UUID': 'ddbf3449-9275-42e5-9f4f-6058fabca551', 'Flags': ['read', 'write'], 'Value': []}}},) to message with signature a{oa{sa{sv}}}: <class 'ValueError'>: Unable to guess signature from an empty list
-Failed to register application: org.bluez.Error.Failed: No object received
-
 import dbus
 import dbus.exceptions
 import dbus.mainloop.glib
 import dbus.service
-
 from gi.repository import GLib
 
 BLUEZ_SERVICE_NAME = "org.bluez"
@@ -16,12 +11,6 @@ DBUS_PROP_IFACE = "org.freedesktop.DBus.Properties"
 
 GATT_SERVICE_IFACE = "org.bluez.GattService1"
 GATT_CHRC_IFACE = "org.bluez.GattCharacteristic1"
-
-class InvalidArgsException(dbus.exceptions.DBusException):
-    _dbus_error_name = "org.freedesktop.DBus.Error.InvalidArgs"
-
-class NotSupportedException(dbus.exceptions.DBusException):
-    _dbus_error_name = "org.bluez.Error.NotSupported"
 
 class Application(dbus.service.Object):
     def __init__(self, bus):
@@ -106,7 +95,7 @@ class Characteristic(dbus.service.Object):
                 'Service': self.service.get_path(),
                 'UUID': self.uuid,
                 'Flags': self.flags,
-                'Value': self.value,
+                'Value': dbus.Array(self.value, signature='y')
             }
         }
 
@@ -133,14 +122,14 @@ class Characteristic(dbus.service.Object):
         self.value = value
 
 class LEDControllerService(Service):
-    LED_CONTROLLER_UUID = "7a6307c9-5be7-4747-a8b6-51a6cb9b285c"
+    LED_CONTROLLER_UUID = "12345678-1234-5678-1234-56789abcdef0"
 
     def __init__(self, bus, index):
         Service.__init__(self, bus, index, self.LED_CONTROLLER_UUID, True)
         self.add_characteristic(LEDControllerCharacteristic(bus, 0, self))
 
 class LEDControllerCharacteristic(Characteristic):
-    LED_CONTROLLER_CHARACTERISTIC_UUID = "ddbf3449-9275-42e5-9f4f-6058fabca551"
+    LED_CONTROLLER_CHARACTERISTIC_UUID = "87654321-1234-5678-1234-56789abcdef0"
 
     def __init__(self, bus, index, service):
         Characteristic.__init__(
@@ -148,14 +137,16 @@ class LEDControllerCharacteristic(Characteristic):
             self.LED_CONTROLLER_CHARACTERISTIC_UUID,
             ['read', 'write'],
             service)
+        self.value = [0x00]
 
     def ReadValue(self, options):
         print('Read LED Controller Characteristic')
-        return [ord(c) for c in "Hello from Raspberry Pi"]
+        return self.value
 
     def WriteValue(self, value, options):
         print('Write LED Controller Characteristic')
         print('New value:', bytes(value).decode())
+        self.value = value
         # Here you can add logic to control your LED or perform other actions
         # based on the received data
 
@@ -164,8 +155,18 @@ def register_app_cb():
 
 def register_app_error_cb(error):
     print('Failed to register application:', str(error))
-    global mainloop
     mainloop.quit()
+
+def find_adapter(bus):
+    remote_om = dbus.Interface(bus.get_object(BLUEZ_SERVICE_NAME, "/"),
+                               DBUS_OM_IFACE)
+    objects = remote_om.GetManagedObjects()
+
+    for o, props in objects.items():
+        if GATT_MANAGER_IFACE in props.keys():
+            return o
+
+    return None
 
 def main():
     global mainloop
@@ -193,17 +194,6 @@ def main():
                                         error_handler=register_app_error_cb)
 
     mainloop.run()
-
-def find_adapter(bus):
-    remote_om = dbus.Interface(bus.get_object(BLUEZ_SERVICE_NAME, "/"),
-                               DBUS_OM_IFACE)
-    objects = remote_om.GetManagedObjects()
-
-    for o, props in objects.items():
-        if GATT_MANAGER_IFACE in props.keys():
-            return o
-
-    return None
 
 if __name__ == '__main__':
     main()
