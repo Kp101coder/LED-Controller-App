@@ -1,12 +1,3 @@
-Skip adapter: /org/bluez
-Traceback (most recent call last):
-  File "/home/krishpyddev/Desktop/LEDController.py", line 280, in <module>
-    main()
-  File "/home/krishpyddev/Desktop/LEDController.py", line 254, in main
-    app.add_service(LEDControllerService(bus, 0))
-  File "/home/krishpyddev/Desktop/LEDController.py", line 138, in __init__
-    Service.__init__(self, bus, index, self.LED_CONTROLLER_UUID, True)
-TypeError: __init__() missing 1 required positional argument: 'service'
 import dbus
 import dbus.exceptions
 import dbus.mainloop.glib
@@ -47,13 +38,14 @@ class Application(dbus.service.Object):
         return response
 
 class Service(dbus.service.Object):
-    def __init__(self, bus, index, uuid, flags, service):
-        self.path = service.path + '/char' + str(index)
+    PATH_BASE = "/org/bluez/example/service"
+
+    def __init__(self, bus, index, uuid, primary):
+        self.path = self.PATH_BASE + str(index)
         self.bus = bus
         self.uuid = uuid
-        self.service = service
-        self.flags = flags
-        self.value = []
+        self.primary = primary
+        self.characteristics = []
         dbus.service.Object.__init__(self, bus, self.path)
 
     def get_properties(self):
@@ -234,9 +226,8 @@ def find_adapter(bus):
     objects = remote_om.GetManagedObjects()
 
     for o, props in objects.items():
-        if LE_ADVERTISING_MANAGER_IFACE in props and GATT_MANAGER_IFACE in props:
+        if LE_ADVERTISING_MANAGER_IFACE in props:
             return o
-        print('Skip adapter:', o)
 
     return None
 
