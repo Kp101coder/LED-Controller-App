@@ -6,14 +6,11 @@ from gi.repository import GLib
 
 BLUEZ_SERVICE_NAME = "org.bluez"
 GATT_MANAGER_IFACE = "org.bluez.GattManager1"
-LE_ADVERTISING_MANAGER_IFACE = "org.bluez.LEAdvertisingManager1"
 DBUS_OM_IFACE = "org.freedesktop.DBus.ObjectManager"
 DBUS_PROP_IFACE = "org.freedesktop.DBus.Properties"
 
 GATT_SERVICE_IFACE = "org.bluez.GattService1"
 GATT_CHRC_IFACE = "org.bluez.GattCharacteristic1"
-
-LE_ADVERTISEMENT_IFACE = "org.bluez.LEAdvertisement1"
 
 class Application(dbus.service.Object):
     def __init__(self, bus):
@@ -81,14 +78,6 @@ class Service(dbus.service.Object):
         if interface != GATT_SERVICE_IFACE:
             raise InvalidArgsException()
         return self.get_properties()[GATT_SERVICE_IFACE]
-    
-    @dbus.service.method(GATT_CHRC_IFACE, in_signature='aya{sv}')
-    def WriteValue(self, value, options):
-        print('Write request received')
-        print('New value:', bytes(value).decode())
-        self.value = value
-        # Here you can add logic to control your LED or perform other actions
-        # based on the received data
 
 class Characteristic(dbus.service.Object):
     def __init__(self, bus, index, uuid, flags, service):
@@ -133,91 +122,39 @@ class Characteristic(dbus.service.Object):
         self.value = value
 
 class LEDControllerService(Service):
-    LED_CONTROLLER_UUID = "7a6307c9-5be7-4747-a8b6-51a6cb9b285c"  # Updated to match iOS app
+    LED_CONTROLLER_UUID = "7a6307c9-5be7-4747-a8b6-51a6cb9b285c"
 
     def __init__(self, bus, index):
         Service.__init__(self, bus, index, self.LED_CONTROLLER_UUID, True)
         self.add_characteristic(LEDControllerCharacteristic(bus, 0, self))
 
 class LEDControllerCharacteristic(Characteristic):
-    LED_CONTROLLER_CHARACTERISTIC_UUID = "ddbf3449-9275-42e5-9f4f-6058fabca551"  # Updated to match iOS app
+    LED_CONTROLLER_CHARACTERISTIC_UUID = "ddbf3449-9275-42e5-9f4f-6058fabca551"
 
     def __init__(self, bus, index, service):
         Characteristic.__init__(
             self, bus, index,
             self.LED_CONTROLLER_CHARACTERISTIC_UUID,
-            ['read', 'write', 'notify'],
+            ['read', 'write'],
             service)
         self.value = [0x00]
 
     def ReadValue(self, options):
-        print('Read request received')
+        print('Read LED Controller Characteristic')
         return self.value
 
     def WriteValue(self, value, options):
-        print('Write request received')
+        print('Write LED Controller Characteristic')
         print('New value:', bytes(value).decode())
         self.value = value
         # Here you can add logic to control your LED or perform other actions
         # based on the received data
 
-class Advertisement(dbus.service.Object):
-    def __init__(self, bus, index, advertising_type):
-        self.path = "/org/bluez/example/advertisement" + str(index)
-        self.bus = bus
-        self.ad_type = advertising_type
-        self.service_uuids = None
-        self.manufacturer_data = None
-        self.solicit_uuids = None
-        self.service_data = None
-        self.local_name = None
-        self.include_tx_power = None
-        self.data = None
-        dbus.service.Object.__init__(self, bus, self.path)
-
-    def get_properties(self):
-        properties = dict()
-        properties["Type"] = self.ad_type
-        if self.service_uuids is not None:
-            properties["ServiceUUIDs"] = dbus.Array(self.service_uuids,
-                                                    signature='s')
-        if self.solicit_uuids is not None:
-            properties["SolicitUUIDs"] = dbus.Array(self.solicit_uuids,
-                                                    signature='s')
-        if self.manufacturer_data is not None:
-            properties["ManufacturerData"] = dbus.Dictionary(
-                self.manufacturer_data, signature='qv')
-        if self.service_data is not None:
-            properties["ServiceData"] = dbus.Dictionary(self.service_data,
-                                                        signature='sv')
-        if self.local_name is not None:
-            properties["LocalName"] = dbus.String(self.local_name)
-        if self.include_tx_power is not None:
-            properties["IncludeTxPower"] = dbus.Boolean(self.include_tx_power)
-
-        if self.data is not None:
-            properties["Data"] = dbus.Dictionary(
-                self.data, signature='yv')
-        return {LE_ADVERTISEMENT_IFACE: properties}
-
-    @dbus.service.method(LE_ADVERTISEMENT_IFACE,
-                         in_signature='',
-                         out_signature='')
-    def Release(self):
-        print('%s: Released!' % self.path)
-
-def register_ad_cb():
-    print('Advertisement registered')
-
-def register_ad_error_cb(error):
-    print('Failed to register advertisement: ' + str(error))
-    mainloop.quit()
-
 def register_app_cb():
     print('GATT application registered')
 
 def register_app_error_cb(error):
-    print('Failed to register application: ' + str(error))
+    print('Failed to register application:', str(error))
     mainloop.quit()
 
 def find_adapter(bus):
@@ -226,16 +163,14 @@ def find_adapter(bus):
     objects = remote_om.GetManagedObjects()
 
     for o, props in objects.items():
-        if LE_ADVERTISING_MANAGER_IFACE in props:
+        if GATT_MANAGER_IFACE in props.keys():
             return o
 
     return None
 
 def main():
     global mainloop
-
     dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
-
     bus = dbus.SystemBus()
     adapter = find_adapter(bus)
 
@@ -247,17 +182,10 @@ def main():
         bus.get_object(BLUEZ_SERVICE_NAME, adapter),
         GATT_MANAGER_IFACE)
 
-    ad_manager = dbus.Interface(bus.get_object(BLUEZ_SERVICE_NAME, adapter),
-                                LE_ADVERTISING_MANAGER_IFACE)
-
     app = Application(bus)
     app.add_service(LEDControllerService(bus, 0))
 
     mainloop = GLib.MainLoop()
-
-    ad = Advertisement(bus, 0, 'peripheral')
-    ad.add_service_uuid(LEDControllerService.LED_CONTROLLER_UUID)
-    ad.add_local_name("LED Controller")
 
     print('Registering GATT application...')
 
@@ -265,16 +193,7 @@ def main():
                                         reply_handler=register_app_cb,
                                         error_handler=register_app_error_cb)
 
-    ad_manager.RegisterAdvertisement(ad.get_path(), {},
-                                     reply_handler=register_ad_cb,
-                                     error_handler=register_ad_error_cb)
-
-    try:
-        mainloop.run()
-    except KeyboardInterrupt:
-        ad_manager.UnregisterAdvertisement(ad)
-        print("Unregistered Advertisement")
-        dbus.service.Object.remove_from_connection(ad)
+    mainloop.run()
 
 if __name__ == '__main__':
     main()
