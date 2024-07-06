@@ -19,25 +19,43 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         if central.state == .poweredOn {
             print("Bluetooth is powered on. Starting scan...")
-            centralManager.scanForPeripherals(withServices: [CBUUID(string: "7a6307c9-5be7-4747-a8b6-51a6cb9b285c")], options: nil)
+            startScan()
         } else {
             print("Bluetooth is not available.")
         }
     }
 
+    func startScan() {
+        centralManager.scanForPeripherals(withServices: nil, options: nil)
+        print("Scanning for peripherals...")
+    }
+
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
-        print("Discovered peripheral: \(peripheral.name ?? "Unknown")")
-        centralManager.stopScan()
-        connectedPeripheral = peripheral
-        connectedPeripheral?.delegate = self
-        centralManager.connect(peripheral, options: nil)
-        print("Connecting to \(peripheral.name ?? "Unknown")...")
+        print("Discovered peripheral: \(peripheral.name ?? "Unknown") with UUID: \(peripheral.identifier)")
+        
+        // Check if the discovered peripheral is the Raspberry Pi by its UUID
+        if advertisementData[CBAdvertisementDataServiceUUIDsKey] != nil {
+            let serviceUUIDs = advertisementData[CBAdvertisementDataServiceUUIDsKey] as! [CBUUID]
+            if serviceUUIDs.contains(CBUUID(string: "7a6307c9-5be7-4747-a8b6-51a6cb9b285c")) {
+                centralManager.stopScan()
+                connectedPeripheral = peripheral
+                connectedPeripheral?.delegate = self
+                centralManager.connect(peripheral, options: nil)
+                print("Connecting to \(peripheral.identifier)...")
+            }
+        }
     }
 
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
-        print("Connected to \(peripheral.name ?? "Unknown")")
+        print("Connected to \(peripheral.identifier)")
         isConnected = true
         peripheral.discoverServices([CBUUID(string: "7a6307c9-5be7-4747-a8b6-51a6cb9b285c")])
+    }
+
+    func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
+        print("Disconnected from \(peripheral.identifier)")
+        isConnected = false
+        startScan()
     }
 
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
