@@ -32,6 +32,7 @@ class Application(dbus.service.Object):
             chrcs = service.get_characteristics()
             for chrc in chrcs:
                 response[chrc.get_path()] = chrc.get_properties()
+        print("GetManagedObjects called")
         return response
 
 class Service(dbus.service.Object):
@@ -44,6 +45,7 @@ class Service(dbus.service.Object):
         self.primary = primary
         self.characteristics = []
         dbus.service.Object.__init__(self, bus, self.path)
+        print(f"Service {self.uuid} created at {self.path}")
 
     def get_properties(self):
         return {
@@ -61,6 +63,7 @@ class Service(dbus.service.Object):
 
     def add_characteristic(self, characteristic):
         self.characteristics.append(characteristic)
+        print(f"Characteristic {characteristic.uuid} added to service {self.uuid}")
 
     def get_characteristic_paths(self):
         result = []
@@ -77,6 +80,7 @@ class Service(dbus.service.Object):
     def GetAll(self, interface):
         if interface != GATT_SERVICE_IFACE:
             raise InvalidArgsException()
+        print(f"GetAll called for interface {interface}")
         return self.get_properties()[GATT_SERVICE_IFACE]
 
 class Characteristic(dbus.service.Object):
@@ -88,6 +92,7 @@ class Characteristic(dbus.service.Object):
         self.flags = flags
         self.value = []
         dbus.service.Object.__init__(self, bus, self.path)
+        print(f"Characteristic {self.uuid} created at {self.path}")
 
     def get_properties(self):
         return {
@@ -108,6 +113,7 @@ class Characteristic(dbus.service.Object):
     def GetAll(self, interface):
         if interface != GATT_CHRC_IFACE:
             raise InvalidArgsException()
+        print(f"GetAll called for characteristic interface {interface}")
         return self.get_properties()[GATT_CHRC_IFACE]
 
     @dbus.service.method(GATT_CHRC_IFACE, in_signature='a{sv}', out_signature='ay')
@@ -122,6 +128,7 @@ class Characteristic(dbus.service.Object):
         self.value = value
         # Notify the central device of the new value
         self.PropertiesChanged(GATT_CHRC_IFACE, {"Value": self.value}, [])
+        print(f"Characteristic {self.uuid} value updated to {self.value}")
 
 class LEDControllerService(Service):
     LED_CONTROLLER_UUID = "7a6307c9-5be7-4747-a8b6-51a6cb9b285c"
@@ -152,6 +159,7 @@ class LEDControllerCharacteristic(Characteristic):
         # Here you can add logic to control your LED or perform other actions
         # based on the received data
         self.PropertiesChanged(GATT_CHRC_IFACE, {"Value": self.value}, [])
+        print(f"LED Controller Characteristic value updated to {self.value}")
 
 def register_app_cb():
     print('GATT application registered')
@@ -167,6 +175,7 @@ def find_adapter(bus):
 
     for o, props in objects.items():
         if GATT_MANAGER_IFACE in props.keys():
+            print(f"BLE adapter found: {o}")
             return o
 
     return None
