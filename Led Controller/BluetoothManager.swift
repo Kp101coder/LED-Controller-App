@@ -27,13 +27,11 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
 
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         print("Discovered peripheral: \(peripheral.name ?? "Unknown")")
-        if let name = peripheral.name, name == "LEDController" {
-            centralManager.stopScan()
-            connectedPeripheral = peripheral
-            connectedPeripheral?.delegate = self
-            centralManager.connect(peripheral, options: nil)
-            print("Connecting to \(name)...")
-        }
+        centralManager.stopScan()
+        connectedPeripheral = peripheral
+        connectedPeripheral?.delegate = self
+        centralManager.connect(peripheral, options: nil)
+        print("Connecting to \(peripheral.name ?? "Unknown")...")
     }
 
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {

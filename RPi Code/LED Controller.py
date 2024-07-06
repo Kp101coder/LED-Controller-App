@@ -17,12 +17,14 @@ class Application(dbus.service.Object):
         self.path = "/"
         self.services = []
         dbus.service.Object.__init__(self, bus, self.path)
+        print("Application initialized")
 
     def get_path(self):
         return dbus.ObjectPath(self.path)
 
     def add_service(self, service):
         self.services.append(service)
+        print(f"Service added: {service.uuid}")
 
     @dbus.service.method(DBUS_OM_IFACE, out_signature="a{oa{sa{sv}}}")
     def GetManagedObjects(self):
