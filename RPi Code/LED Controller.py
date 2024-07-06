@@ -118,8 +118,10 @@ class Characteristic(dbus.service.Object):
     @dbus.service.method(GATT_CHRC_IFACE, in_signature='aya{sv}')
     def WriteValue(self, value, options):
         print('WriteValue called')
-        print('New value:', bytes(value))
+        print('New value:', bytes(value).decode())
         self.value = value
+        # Notify the central device of the new value
+        self.PropertiesChanged(GATT_CHRC_IFACE, {"Value": self.value}, [])
 
 class LEDControllerService(Service):
     LED_CONTROLLER_UUID = "7a6307c9-5be7-4747-a8b6-51a6cb9b285c"
@@ -149,6 +151,7 @@ class LEDControllerCharacteristic(Characteristic):
         self.value = value
         # Here you can add logic to control your LED or perform other actions
         # based on the received data
+        self.PropertiesChanged(GATT_CHRC_IFACE, {"Value": self.value}, [])
 
 def register_app_cb():
     print('GATT application registered')
