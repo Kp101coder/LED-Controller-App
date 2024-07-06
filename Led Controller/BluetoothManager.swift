@@ -60,9 +60,6 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
                 if characteristic.properties.contains(.write) {
                     dataCharacteristic = characteristic
                     print("Characteristic is writable")
-                    // Send initial data if necessary
-                    let initialData = "Hello from iPhone".data(using: .utf8)!
-                    sendData(initialData)
                 }
                 if characteristic.properties.contains(.notify) {
                     peripheral.setNotifyValue(true, for: characteristic)
