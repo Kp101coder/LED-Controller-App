@@ -41,6 +41,7 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
     }
 
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
+        print("Discovering Services...")
         if let services = peripheral.services {
             for service in services {
                 print("Discovered service: \(service.uuid)")
