@@ -1,5 +1,3 @@
-Failed to register advertisement: org.freedesktop.DBus.Error.UnknownMethod: Method "RegisterAdvertisement" with signature "oa{sv}" on interface "org.bluez.LEAdvertisement1" doesn't exist
-
 import dbus
 import dbus.exceptions
 import dbus.mainloop.glib
@@ -8,6 +6,7 @@ from gi.repository import GLib
 
 BLUEZ_SERVICE_NAME = "org.bluez"
 GATT_MANAGER_IFACE = "org.bluez.GattManager1"
+LE_ADVERTISING_MANAGER_IFACE = "org.bluez.LEAdvertisingManager1"
 DBUS_OM_IFACE = "org.freedesktop.DBus.ObjectManager"
 DBUS_PROP_IFACE = "org.freedesktop.DBus.Properties"
 
@@ -256,7 +255,7 @@ def find_adapter(bus):
     objects = remote_om.GetManagedObjects()
 
     for o, props in objects.items():
-        if GATT_MANAGER_IFACE in props.keys():
+        if LE_ADVERTISING_MANAGER_IFACE in props.keys():
             print(f"BLE adapter found: {o}")
             return o
 
@@ -277,7 +276,7 @@ def main():
         GATT_MANAGER_IFACE)
     ad_manager = dbus.Interface(
         bus.get_object(BLUEZ_SERVICE_NAME, adapter),
-        'org.bluez.LEAdvertisement1')
+        LE_ADVERTISING_MANAGER_IFACE)
 
     app = Application(bus)
     app.add_service(LEDControllerService(bus, 0))
@@ -292,7 +291,7 @@ def main():
                                         error_handler=register_app_error_cb)
 
     print('Registering advertisement...')
-    ad_manager.RegisterAdvertisement(adv.get_path(), dbus.Dictionary({}, signature='sv'),
+    ad_manager.RegisterAdvertisement(adv.get_path(), {},
                                      reply_handler=register_ad_cb,
                                      error_handler=register_ad_error_cb)
 
