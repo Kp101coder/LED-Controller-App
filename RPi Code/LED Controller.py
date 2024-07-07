@@ -1,3 +1,16 @@
+ERROR:dbus.connection:Unable to set arguments (dbus.ObjectPath('/org/bluez/example/advertisement0'), {}) according to signature None: <class 'ValueError'>: Unable to guess signature from an empty dict
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/dbus/connection.py", line 606, in msg_reply_handler
+    reply_handler(*message.get_args_list(**get_args_opts))
+  File "/usr/lib/python3/dist-packages/dbus/proxies.py", line 403, in _introspect_reply_handler
+    self._introspect_execute_queue()
+  File "/usr/lib/python3/dist-packages/dbus/proxies.py", line 389, in _introspect_execute_queue
+    proxy_method(*args, **keywords)
+  File "/usr/lib/python3/dist-packages/dbus/proxies.py", line 131, in __call__
+    self._connection.call_async(self._named_service,
+  File "/usr/lib/python3/dist-packages/dbus/connection.py", line 586, in call_async
+    message.append(signature=signature, *args)
+ValueError: Unable to guess signature from an empty dict
 import dbus
 import dbus.exceptions
 import dbus.mainloop.glib
