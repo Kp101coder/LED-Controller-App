@@ -1,28 +1,201 @@
-ERROR:dbus.connection:Unable to set arguments (dbus.ObjectPath('/org/bluez/example/advertisement0'), {}) according to signature None: <class 'ValueError'>: Unable to guess signature from an empty dict
-Traceback (most recent call last):
-  File "/usr/lib/python3/dist-packages/dbus/connection.py", line 606, in msg_reply_handler
-    reply_handler(*message.get_args_list(**get_args_opts))
-  File "/usr/lib/python3/dist-packages/dbus/proxies.py", line 403, in _introspect_reply_handler
-    self._introspect_execute_queue()
-  File "/usr/lib/python3/dist-packages/dbus/proxies.py", line 389, in _introspect_execute_queue
-    proxy_method(*args, **keywords)
-  File "/usr/lib/python3/dist-packages/dbus/proxies.py", line 131, in __call__
-    self._connection.call_async(self._named_service,
-  File "/usr/lib/python3/dist-packages/dbus/connection.py", line 586, in call_async
-    message.append(signature=signature, *args)
-ValueError: Unable to guess signature from an empty dict
 import dbus
 import dbus.exceptions
 import dbus.mainloop.glib
 import dbus.service
 from gi.repository import GLib
-from advertisement import Advertisement
-from gatt_server import Application, Service, Characteristic
 
 BLUEZ_SERVICE_NAME = "org.bluez"
 GATT_MANAGER_IFACE = "org.bluez.GattManager1"
 DBUS_OM_IFACE = "org.freedesktop.DBus.ObjectManager"
 DBUS_PROP_IFACE = "org.freedesktop.DBus.Properties"
+
+class Advertisement(dbus.service.Object):
+    PATH_BASE = '/org/bluez/example/advertisement'
+
+    def __init__(self, bus, index, adv_type):
+        self.path = self.PATH_BASE + str(index)
+        self.bus = bus
+        self.ad_type = adv_type
+        self.service_uuids = None
+        self.manufacturer_data = None
+        self.solicit_uuids = None
+        self.service_data = None
+        self.local_name = None
+        self.include_tx_power = False
+        self.data = None
+        self.discoverable = True
+        dbus.service.Object.__init__(self, bus, self.path)
+
+    def get_properties(self):
+        properties = dict()
+        properties['Type'] = self.ad_type
+        if self.service_uuids:
+            properties['ServiceUUIDs'] = dbus.Array(self.service_uuids, signature='s')
+        if self.manufacturer_data:
+            properties['ManufacturerData'] = dbus.Dictionary(self.manufacturer_data, signature='qv')
+        if self.solicit_uuids:
+            properties['SolicitUUIDs'] = dbus.Array(self.solicit_uuids, signature='s')
+        if self.service_data:
+            properties['ServiceData'] = dbus.Dictionary(self.service_data, signature='sv')
+        if self.local_name:
+            properties['LocalName'] = dbus.String(self.local_name)
+        if self.include_tx_power:
+            properties['IncludeTxPower'] = dbus.Boolean(self.include_tx_power)
+        if self.data:
+            properties['Data'] = dbus.Dictionary(self.data, signature='yv')
+        properties['Discoverable'] = dbus.Boolean(self.discoverable)
+        return {'org.bluez.LEAdvertisement1': properties}
+
+    @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature='s', out_signature='a{sv}')
+    def GetAll(self, interface):
+        if interface != 'org.bluez.LEAdvertisement1':
+            raise dbus.exceptions.DBusException(
+                'org.freedesktop.DBus.Error.InvalidArgs: Invalid interface')
+        return self.get_properties()['org.bluez.LEAdvertisement1']
+
+    @dbus.service.method('org.bluez.LEAdvertisement1', in_signature='', out_signature='')
+    def Release(self):
+        print('%s: Released!' % self.path)
+
+    def get_path(self):
+        return dbus.ObjectPath(self.path)
+
+    def add_service_uuid(self, uuid):
+        if not self.service_uuids:
+            self.service_uuids = []
+        self.service_uuids.append(uuid)
+
+    def add_service_data(self, uuid, data):
+        if not self.service_data:
+            self.service_data = dbus.Dictionary({}, signature='sv')
+        self.service_data[uuid] = dbus.Array(data, signature='y')
+
+    def add_manufacturer_data(self, manufacturer_id, data):
+        if not self.manufacturer_data:
+            self.manufacturer_data = dbus.Dictionary({}, signature='qv')
+        self.manufacturer_data[manufacturer_id] = dbus.Array(data, signature='y')
+
+    def add_solicit_uuid(self, uuid):
+        if not self.solicit_uuids:
+            self.solicit_uuids = []
+        self.solicit_uuids.append(uuid)
+
+class Application(dbus.service.Object):
+    def __init__(self, bus):
+        self.path = '/'
+        self.services = []
+        dbus.service.Object.__init__(self, bus, self.path)
+
+    def get_path(self):
+        return dbus.ObjectPath(self.path)
+
+    def add_service(self, service):
+        self.services.append(service)
+        print(f"Service {service.uuid} added")
+
+    @dbus.service.method('org.freedesktop.DBus.ObjectManager', out_signature='a{oa{sa{sv}}}')
+    def GetManagedObjects(self):
+        response = {}
+        for service in self.services:
+            response[service.get_path()] = service.get_properties()
+            chrcs = service.get_characteristics()
+            for chrc in chrcs:
+                response[chrc.get_path()] = chrc.get_properties()
+        print("GetManagedObjects called")
+        return response
+
+class Service(dbus.service.Object):
+    PATH_BASE = '/org/bluez/example/service'
+
+    def __init__(self, bus, index, uuid, primary):
+        self.path = self.PATH_BASE + str(index)
+        self.bus = bus
+        self.uuid = uuid
+        self.primary = primary
+        self.characteristics = []
+        dbus.service.Object.__init__(self, bus, self.path)
+        print(f"Service {self.uuid} created at {self.path}")
+
+    def get_properties(self):
+        return {
+            'org.bluez.GattService1': {
+                'UUID': self.uuid,
+                'Primary': self.primary,
+                'Characteristics': dbus.Array(
+                    self.get_characteristic_paths(),
+                    signature='o')
+            }
+        }
+
+    def get_path(self):
+        return dbus.ObjectPath(self.path)
+
+    def add_characteristic(self, characteristic):
+        self.characteristics.append(characteristic)
+        print(f"Characteristic {characteristic.uuid} added to service {self.uuid}")
+
+    def get_characteristic_paths(self):
+        result = []
+        for chrc in self.characteristics:
+            result.append(chrc.get_path())
+        return result
+
+    def get_characteristics(self):
+        return self.characteristics
+
+    @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature='s', out_signature='a{sv}')
+    def GetAll(self, interface):
+        if interface != 'org.bluez.GattService1':
+            raise dbus.exceptions.DBusException(
+                'org.freedesktop.DBus.Error.InvalidArgs: Invalid interface')
+        print(f"GetAll called for interface {interface}")
+        return self.get_properties()['org.bluez.GattService1']
+
+class Characteristic(dbus.service.Object):
+    def __init__(self, bus, index, uuid, flags, service):
+        self.path = service.path + '/char' + str(index)
+        self.bus = bus
+        self.uuid = uuid
+        self.service = service
+        self.flags = flags
+        self.value = []
+        dbus.service.Object.__init__(self, bus, self.path)
+        print(f"Characteristic {self.uuid} created at {self.path}")
+
+    def get_properties(self):
+        return {
+            'org.bluez.GattCharacteristic1': {
+                'Service': self.service.get_path(),
+                'UUID': self.uuid,
+                'Flags': self.flags,
+                'Value': dbus.Array(self.value, signature='y')
+            }
+        }
+
+    def get_path(self):
+        return dbus.ObjectPath(self.path)
+
+    @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature='s', out_signature='a{sv}')
+    def GetAll(self, interface):
+        if interface != 'org.bluez.GattCharacteristic1':
+            raise dbus.exceptions.DBusException(
+                'org.freedesktop.DBus.Error.InvalidArgs: Invalid interface')
+        print(f"GetAll called for characteristic interface {interface}")
+        return self.get_properties()['org.bluez.GattCharacteristic1']
+
+    @dbus.service.method('org.bluez.GattCharacteristic1', in_signature='a{sv}', out_signature='ay')
+    def ReadValue(self, options):
+        print('ReadValue called')
+        return self.value
+
+    @dbus.service.method('org.bluez.GattCharacteristic1', in_signature='aya{sv}')
+    def WriteValue(self, value, options):
+        print('WriteValue called')
+        print('New value:', bytes(value).decode())
+        self.value = value
+        # Notify the central device of the new value
+        self.PropertiesChanged('org.bluez.GattCharacteristic1', {"Value": self.value}, [])
+        print(f"Characteristic {self.uuid} value updated to {self.value}")
 
 class LEDControllerService(Service):
     LED_CONTROLLER_UUID = "7a6307c9-5be7-4747-a8b6-51a6cb9b285c"
@@ -117,7 +290,7 @@ def main():
                                         error_handler=register_app_error_cb)
 
     print('Registering advertisement...')
-    ad_manager.RegisterAdvertisement(adv.get_path(), {},
+    ad_manager.RegisterAdvertisement(adv.get_path(), dbus.Dictionary({}, signature='sv'),
                                      reply_handler=register_ad_cb,
                                      error_handler=register_ad_error_cb)
 
