@@ -1,3 +1,5 @@
+Failed to register advertisement: org.freedesktop.DBus.Error.UnknownMethod: Method "RegisterAdvertisement" with signature "oa{sv}" on interface "org.bluez.LEAdvertisement1" doesn't exist
+
 import dbus
 import dbus.exceptions
 import dbus.mainloop.glib
