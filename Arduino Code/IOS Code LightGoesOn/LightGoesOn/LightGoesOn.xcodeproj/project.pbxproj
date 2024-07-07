@@ -280,7 +280,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"LightGoesOn/Preview Content\"";
-				DEVELOPMENT_TEAM = 2VA9RUV2PN;
+				DEVELOPMENT_TEAM = B88DBQZU3A;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "So we can scan for the LED device";
@@ -310,7 +310,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"LightGoesOn/Preview Content\"";
-				DEVELOPMENT_TEAM = 2VA9RUV2PN;
+				DEVELOPMENT_TEAM = B88DBQZU3A;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "So we can scan for the LED device";
