@@ -1,4 +1,3 @@
-#Made by Krish Prabhu                    and maybe a bit of chatgpt and claudeai
 import dbus
 import dbus.exceptions
 import dbus.mainloop.glib

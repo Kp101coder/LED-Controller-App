@@ -26,24 +26,19 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
     }
 
     func startScan() {
-        centralManager.scanForPeripherals(withServices: nil, options: nil)
+        centralManager.scanForPeripherals(withServices: [CBUUID(string: "7a6307c9-5be7-4747-a8b6-51a6cb9b285c")], options: nil)
         print("Scanning for peripherals...")
     }
 
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         print("Discovered peripheral: \(peripheral.name ?? "Unknown") with UUID: \(peripheral.identifier)")
         
-        // Check if the discovered peripheral is the Raspberry Pi by its UUID
-        if advertisementData[CBAdvertisementDataServiceUUIDsKey] != nil {
-            let serviceUUIDs = advertisementData[CBAdvertisementDataServiceUUIDsKey] as! [CBUUID]
-            if serviceUUIDs.contains(CBUUID(string: "7a6307c9-5be7-4747-a8b6-51a6cb9b285c")) {
-                centralManager.stopScan()
-                connectedPeripheral = peripheral
-                connectedPeripheral?.delegate = self
-                centralManager.connect(peripheral, options: nil)
-                print("Connecting to \(peripheral.identifier)...")
-            }
-        }
+        // Connect to the discovered peripheral
+        centralManager.stopScan()
+        connectedPeripheral = peripheral
+        connectedPeripheral?.delegate = self
+        centralManager.connect(peripheral, options: [CBConnectPeripheralOptionNotifyOnConnectionKey: true])
+        print("Connecting to \(peripheral.identifier)...")
     }
 
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
@@ -59,7 +54,6 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
     }
 
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
-        print("Discovering Services...")
         if let services = peripheral.services {
             for service in services {
                 print("Discovered service: \(service.uuid)")
