@@ -45,7 +45,7 @@ void setup() {
   pinMode(19, OUTPUT);
   // put your setup code here, to run once:
   Serial.println("Setting up bluetooth services.");
-  BLEDevice::init("My ESP 32");
+  BLEDevice::init("LEDController");
   bServer = BLEDevice::createServer();
   bServer->setCallbacks(new ServerConnectionCallbacks());
 
