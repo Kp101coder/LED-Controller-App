@@ -88,7 +88,7 @@ class Application(dbus.service.Object):
         dbus.service.Object.__init__(self, bus, self.path)
 
     def get_path(self):
-        return dbus.ObjectPath(self.path)
+        return dbus.Object.Path(self.path)
 
     def add_service(self, service):
         self.services.append(service)
@@ -129,7 +129,7 @@ class Service(dbus.service.Object):
         }
 
     def get_path(self):
-        return dbus.ObjectPath(self.path)
+        return dbus.Object.Path(self.path)
 
     def add_characteristic(self, characteristic):
         self.characteristics.append(characteristic)
@@ -175,7 +175,7 @@ class Characteristic(dbus.service.Object):
         }
 
     def get_path(self):
-        return dbus.ObjectPath(self.path)
+        return dbus.Object.Path(self.path)
 
     @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature='s', out_signature='a{sv}')
     def GetAll(self, interface):
@@ -217,14 +217,14 @@ class Characteristic(dbus.service.Object):
     def send_notification(self):
         if not self.notifying:
             return False
-        self.PropertiesChanged(dbus.PROPERTIES_IFACE, {"Value": self.value}, [])
+        self.PropertiesChanged('org.freedesktop.DBus.Properties', {"Value": self.value}, [])
         print(f"Sent notification with value: {self.value}")
         return True
 
     def send_update(self, value):
         self.value = value
         if self.notifying:
-            self.PropertiesChanged(dbus.PROPERTIES_IFACE, {"Value": self.value}, [])
+            self.PropertiesChanged('org.freedesktop.DBus.Properties', {"Value": self.value}, [])
             print(f"Sent notification with value: {self.value}")
 
 class LEDControllerCharacteristic(Characteristic):
@@ -248,7 +248,7 @@ class LEDControllerCharacteristic(Characteristic):
         self.value = value
         # Here you can add logic to control your LED or perform other actions
         # based on the received data
-        self.PropertiesChanged(dbus.PROPERTIES_IFACE, {"Value": self.value}, [])
+        self.PropertiesChanged('org.freedesktop.DBus.Properties', {"Value": self.value}, [])
         print(f"LED Controller Characteristic value updated to {self.value}")
 
 class LEDControllerService(Service):
