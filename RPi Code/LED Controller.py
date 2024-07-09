@@ -205,14 +205,21 @@ class Characteristic(dbus.service.Object):
             return
         self.notifying = True
         print('StartNotify called')
-        self.PropertiesChanged('org.bluez.GattCharacteristic1', {"Value": self.value}, [])
-    
+        GLib.timeout_add_seconds(1, self.send_notification)
+
     @dbus.service.method('org.bluez.GattCharacteristic1', in_signature='', out_signature='')
     def StopNotify(self):
         if not self.notifying:
             return
         self.notifying = False
         print('StopNotify called')
+
+    def send_notification(self):
+        if not self.notifying:
+            return False
+        self.PropertiesChanged('org.bluez.GattCharacteristic1', {"Value": self.value}, [])
+        print(f"Sent notification with value: {self.value}")
+        return True
 
     def send_update(self, value):
         self.value = value
@@ -227,7 +234,7 @@ class LEDControllerCharacteristic(Characteristic):
         Characteristic.__init__(
             self, bus, index,
             self.LED_CONTROLLER_CHARACTERISTIC_UUID,
-            ['read', 'write'],
+            ['read', 'write', 'notify'],
             service)
         self.value = [0x00]
 
