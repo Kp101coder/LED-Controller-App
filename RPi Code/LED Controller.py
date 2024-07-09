@@ -196,7 +196,7 @@ class Characteristic(dbus.service.Object):
         print('New value:', bytes(value).decode())
         self.value = value
         # Notify the central device of the new value
-        self.PropertiesChanged('org.freedesktop.DBus.Properties', {"Value": self.value}, [])
+        self.send_properties_changed()
         print(f"Characteristic {self.uuid} value updated to {self.value}")
 
     @dbus.service.method('org.bluez.GattCharacteristic1', in_signature='', out_signature='')
@@ -217,15 +217,18 @@ class Characteristic(dbus.service.Object):
     def send_notification(self):
         if not self.notifying:
             return False
-        self.PropertiesChanged('org.freedesktop.DBus.Properties', {"Value": self.value}, [])
+        self.send_properties_changed()
         print(f"Sent notification with value: {self.value}")
         return True
 
     def send_update(self, value):
         self.value = value
         if self.notifying:
-            self.PropertiesChanged('org.freedesktop.DBus.Properties', {"Value": self.value}, [])
+            self.send_properties_changed()
             print(f"Sent notification with value: {self.value}")
+
+    def send_properties_changed(self):
+        self.PropertiesChanged(dbus.PROPERTIES_IFACE, {"Value": self.value}, [])
 
 class LEDControllerCharacteristic(Characteristic):
     LED_CONTROLLER_CHARACTERISTIC_UUID = "ddbf3449-9275-42e5-9f4f-6058fabca551"
@@ -248,7 +251,7 @@ class LEDControllerCharacteristic(Characteristic):
         self.value = value
         # Here you can add logic to control your LED or perform other actions
         # based on the received data
-        self.PropertiesChanged('org.freedesktop.DBus.Properties', {"Value": self.value}, [])
+        self.send_properties_changed()
         print(f"LED Controller Characteristic value updated to {self.value}")
 
 class LEDControllerService(Service):
