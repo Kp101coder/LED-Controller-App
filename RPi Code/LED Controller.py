@@ -1,15 +1,3 @@
-Traceback (most recent call last):
-  File "/home/krishpyddev/Desktop/LED BLE Server/LED Controller.py", line 220, in send_notification
-    self.PropertiesChanged('org.bluez.GattCharacteristic1', {"Value": self.value}, [])
-AttributeError: 'LEDControllerCharacteristic' object has no attribute 'PropertiesChanged'
-Traceback (most recent call last):
-  File "/home/krishpyddev/Desktop/LED BLE Server/LED Controller.py", line 334, in send_periodic_updates
-    led_service.send_update_to_char(value)
-  File "/home/krishpyddev/Desktop/LED BLE Server/LED Controller.py", line 263, in send_update_to_char
-    self.led_char.send_update(value)
-  File "/home/krishpyddev/Desktop/LED BLE Server/LED Controller.py", line 227, in send_update
-    self.PropertiesChanged('org.bluez.GattCharacteristic1', {"Value": self.value}, [])
-AttributeError: 'LEDControllerCharacteristic' object has no attribute 'PropertiesChanged'
 import dbus
 import dbus.exceptions
 import dbus.mainloop.glib
@@ -229,14 +217,14 @@ class Characteristic(dbus.service.Object):
     def send_notification(self):
         if not self.notifying:
             return False
-        self.PropertiesChanged('org.bluez.GattCharacteristic1', {"Value": self.value}, [])
+        self.PropertiesChanged(dbus.PROPERTIES_IFACE, {"Value": self.value}, [])
         print(f"Sent notification with value: {self.value}")
         return True
 
     def send_update(self, value):
         self.value = value
         if self.notifying:
-            self.PropertiesChanged('org.bluez.GattCharacteristic1', {"Value": self.value}, [])
+            self.PropertiesChanged(dbus.PROPERTIES_IFACE, {"Value": self.value}, [])
             print(f"Sent notification with value: {self.value}")
 
 class LEDControllerCharacteristic(Characteristic):
@@ -260,7 +248,7 @@ class LEDControllerCharacteristic(Characteristic):
         self.value = value
         # Here you can add logic to control your LED or perform other actions
         # based on the received data
-        self.PropertiesChanged('org.bluez.GattCharacteristic1', {"Value": self.value}, [])
+        self.PropertiesChanged(dbus.PROPERTIES_IFACE, {"Value": self.value}, [])
         print(f"LED Controller Characteristic value updated to {self.value}")
 
 class LEDControllerService(Service):
