@@ -43,13 +43,17 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
 
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         print("Connected to \(peripheral.identifier)")
-        isConnected = true
+        DispatchQueue.main.async {
+            self.isConnected = true
+        }
         peripheral.discoverServices([CBUUID(string: "7a6307c9-5be7-4747-a8b6-51a6cb9b285c")])
     }
 
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         print("Disconnected from \(peripheral.identifier)")
-        isConnected = false
+        DispatchQueue.main.async {
+            self.isConnected = false
+        }
         startScan()
     }
 
@@ -84,8 +88,10 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
 
     func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
         if let data = characteristic.value {
-            receivedData = String(data: data, encoding: .utf8) ?? "Unknown data"
-            print("Received data: \(receivedData)")
+            DispatchQueue.main.async {
+                self.receivedData = String(data: data, encoding: .utf8) ?? "Unknown data"
+                print("Received data: \(self.receivedData)")
+            }
         } else if let error = error {
             print("Error updating value for characteristic: \(error.localizedDescription)")
         }

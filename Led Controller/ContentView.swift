@@ -105,12 +105,8 @@ struct MainUI: View
         }
         Button("Transmit") 
         {
-            let dataToSend = "Hello from \(UIDevice.current.name)".data(using: .utf8)!
+            let dataToSend = button1Text.data(using: .utf8)!
             bluetoothManager.sendData(dataToSend)
-            if(bluetoothManager.isConnected)
-            {
-                
-            }
         }
         .padding()
         .foregroundColor(bluetoothManager.isConnected ? Color.blue : Color.red)
@@ -119,11 +115,21 @@ struct MainUI: View
             .opacity(O)
             .frame(width: 100))
         .onReceive(bluetoothManager.$receivedData, perform: { _ in
-            status = bluetoothManager.receivedData
+            DispatchQueue.main.async
+            {
+                status = bluetoothManager.receivedData
+                print("New Status: " + status)
+                print(bluetoothManager.receivedData)
+            }
         })
         .onReceive(bluetoothManager.$isConnected)
         { isConnected in
-            status = bluetoothManager.isConnected ? "Connected" : "Scanning"
+            DispatchQueue.main.async
+            {
+                status = isConnected ? "Connected" : "Scanning"
+                print("Current Connect/Status: " + status)
+                print(bluetoothManager.isConnected)
+            }
         }
     }
 }
