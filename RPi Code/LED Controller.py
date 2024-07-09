@@ -1,3 +1,15 @@
+Traceback (most recent call last):
+  File "/home/krishpyddev/Desktop/LED BLE Server/LED Controller.py", line 220, in send_notification
+    self.PropertiesChanged('org.bluez.GattCharacteristic1', {"Value": self.value}, [])
+AttributeError: 'LEDControllerCharacteristic' object has no attribute 'PropertiesChanged'
+Traceback (most recent call last):
+  File "/home/krishpyddev/Desktop/LED BLE Server/LED Controller.py", line 334, in send_periodic_updates
+    led_service.send_update_to_char(value)
+  File "/home/krishpyddev/Desktop/LED BLE Server/LED Controller.py", line 263, in send_update_to_char
+    self.led_char.send_update(value)
+  File "/home/krishpyddev/Desktop/LED BLE Server/LED Controller.py", line 227, in send_update
+    self.PropertiesChanged('org.bluez.GattCharacteristic1', {"Value": self.value}, [])
+AttributeError: 'LEDControllerCharacteristic' object has no attribute 'PropertiesChanged'
 import dbus
 import dbus.exceptions
 import dbus.mainloop.glib
