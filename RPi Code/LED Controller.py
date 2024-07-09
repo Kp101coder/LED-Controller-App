@@ -160,6 +160,7 @@ class Characteristic(dbus.service.Object):
         self.service = service
         self.flags = flags
         self.value = []
+        self.notifying = False
         dbus.service.Object.__init__(self, bus, self.path)
         print(f"Characteristic {self.uuid} created at {self.path}")
 
@@ -198,36 +199,37 @@ class Characteristic(dbus.service.Object):
         self.PropertiesChanged('org.bluez.GattCharacteristic1', {"Value": self.value}, [])
         print(f"Characteristic {self.uuid} value updated to {self.value}")
 
+    @dbus.service.method('org.bluez.GattCharacteristic1', in_signature='', out_signature='')
+    def StartNotify(self):
+        if self.notifying:
+            return
+        self.notifying = True
+        print('StartNotify called')
+        self.PropertiesChanged('org.bluez.GattCharacteristic1', {"Value": self.value}, [])
+    
+    @dbus.service.method('org.bluez.GattCharacteristic1', in_signature='', out_signature='')
+    def StopNotify(self):
+        if not self.notifying:
+            return
+        self.notifying = False
+        print('StopNotify called')
+
+    def send_update(self, value):
+        self.value = value
+        if self.notifying:
+            self.PropertiesChanged('org.bluez.GattCharacteristic1', {"Value": self.value}, [])
+            print(f"Sent notification with value: {self.value}")
+
 class LEDControllerService(Service):
     LED_CONTROLLER_UUID = "7a6307c9-5be7-4747-a8b6-51a6cb9b285c"
 
     def __init__(self, bus, index):
         Service.__init__(self, bus, index, self.LED_CONTROLLER_UUID, True)
-        self.add_characteristic(LEDControllerCharacteristic(bus, 0, self))
+        self.led_char = LEDControllerCharacteristic(bus, 0, self)
+        self.add_characteristic(self.led_char)
 
-class LEDControllerCharacteristic(Characteristic):
-    LED_CONTROLLER_CHARACTERISTIC_UUID = "ddbf3449-9275-42e5-9f4f-6058fabca551"
-
-    def __init__(self, bus, index, service):
-        Characteristic.__init__(
-            self, bus, index,
-            self.LED_CONTROLLER_CHARACTERISTIC_UUID,
-            ['read', 'write'],
-            service)
-        self.value = [0x00]
-
-    def ReadValue(self, options):
-        print('Read LED Controller Characteristic')
-        return self.value
-
-    def WriteValue(self, value, options):
-        print('Write LED Controller Characteristic')
-        print('New value:', bytes(value).decode())
-        self.value = value
-        # Here you can add logic to control your LED or perform other actions
-        # based on the received data
-        self.PropertiesChanged(GATT_CHRC_IFACE, {"Value": self.value}, [])
-        print(f"LED Controller Characteristic value updated to {self.value}")
+    def send_update_to_char(self, value):
+        self.led_char.send_update(value)
 
 class LEDControllerAdvertisement(Advertisement):
     def __init__(self, bus, index):
@@ -279,7 +281,8 @@ def main():
         LE_ADVERTISING_MANAGER_IFACE)
 
     app = Application(bus)
-    app.add_service(LEDControllerService(bus, 0))
+    led_service = LEDControllerService(bus, 0)
+    app.add_service(led_service)
 
     adv = LEDControllerAdvertisement(bus, 0)
 
@@ -295,6 +298,12 @@ def main():
                                      reply_handler=register_ad_cb,
                                      error_handler=register_ad_error_cb)
 
+    def send_periodic_updates():
+        value = [ord(c) for c in "Hello iPhone"]
+        led_service.send_update_to_char(value)
+        return True
+
+    GLib.timeout_add_seconds(5, send_periodic_updates)
     mainloop.run()
 
 if __name__ == '__main__':
