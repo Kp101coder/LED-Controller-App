@@ -220,6 +220,30 @@ class Characteristic(dbus.service.Object):
             self.PropertiesChanged('org.bluez.GattCharacteristic1', {"Value": self.value}, [])
             print(f"Sent notification with value: {self.value}")
 
+class LEDControllerCharacteristic(Characteristic):
+    LED_CONTROLLER_CHARACTERISTIC_UUID = "ddbf3449-9275-42e5-9f4f-6058fabca551"
+
+    def __init__(self, bus, index, service):
+        Characteristic.__init__(
+            self, bus, index,
+            self.LED_CONTROLLER_CHARACTERISTIC_UUID,
+            ['read', 'write'],
+            service)
+        self.value = [0x00]
+
+    def ReadValue(self, options):
+        print('Read LED Controller Characteristic')
+        return self.value
+
+    def WriteValue(self, value, options):
+        print('Write LED Controller Characteristic')
+        print('New value:', bytes(value).decode())
+        self.value = value
+        # Here you can add logic to control your LED or perform other actions
+        # based on the received data
+        self.PropertiesChanged(GATT_CHRC_IFACE, {"Value": self.value}, [])
+        print(f"LED Controller Characteristic value updated to {self.value}")
+
 class LEDControllerService(Service):
     LED_CONTROLLER_UUID = "7a6307c9-5be7-4747-a8b6-51a6cb9b285c"
 
