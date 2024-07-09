@@ -196,7 +196,7 @@ class Characteristic(dbus.service.Object):
         print('New value:', bytes(value).decode())
         self.value = value
         # Notify the central device of the new value
-        self.PropertiesChanged('org.bluez.GattCharacteristic1', {"Value": self.value}, [])
+        self.PropertiesChanged('org.freedesktop.DBus.Properties', {"Value": self.value}, [])
         print(f"Characteristic {self.uuid} value updated to {self.value}")
 
     @dbus.service.method('org.bluez.GattCharacteristic1', in_signature='', out_signature='')
