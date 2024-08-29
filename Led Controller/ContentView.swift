@@ -83,14 +83,16 @@ struct MainUI: View
     @State var image3:Image?
     //Bluetooth handlers
     @State var status = "Not Connected"
+    @State var statusColor = Color.black
     @StateObject private var bluetoothManager = BluetoothManager()
     
     
     var body: some View 
     {
+
         Text("Connection Status: " + status)
-            .foregroundColor(Color.black)
-            .padding()
+            .foregroundColor(statusColor)
+            .padding(status.contains("Disconnected") ? 8 : 10)
             .background(RoundedRectangle(cornerRadius: R)
                 .fill(Color.gray)
                 .opacity(O))
@@ -126,9 +128,22 @@ struct MainUI: View
         { isConnected in
             DispatchQueue.main.async
             {
-                status = isConnected ? "Connected" : "Scanning"
+                if(isConnected)
+                {
+                    statusColor = Color.green
+                    status = "Connected"
+                }
+                else if(status == "Connected" && !isConnected)
+                {
+                    status = "Disconnected [Refresh App]"
+                    statusColor = Color.red
+                }
+                else
+                {
+                    statusColor = Color.black
+                    status = "Scanning"
+                }
                 print("Current Connect/Status: " + status)
-                print(bluetoothManager.isConnected)
             }
         }
     }
@@ -149,7 +164,7 @@ struct addSwitch: View {
             blue: Double(rgb[2] ?? 0) / 255.0
         )
     }
-    
+         
     var body: some View {
         VStack {
             RoundedRectangle(cornerRadius: R)
@@ -160,27 +175,27 @@ struct addSwitch: View {
                 .overlay(
                     VStack {
                         Label(
-                            title: { Text("Switch " + String(switchNumber)) },
-                            icon: { Image(systemName: "switch.2") }
+                            title: { Text("Switch " + String(switchNumber)).foregroundColor(Color.black) },
+                            icon: { Image(systemName: "switch.2").foregroundColor(Color.black) }
                         ).padding(.top, 30)
                         HStack {
                             if (!imageButton) {
                                 Toggle(isOn: $rainbowButton) {
-                                    Text("Rainbow Font")
+                                    Text("Rainbow Font").foregroundColor(Color.black)
                                         .frame(maxWidth: .infinity, alignment: .trailing)
-                                }
+                                }.tint(Color.orange)
                             }
                             Toggle(isOn: $imageButton) {
-                                Text("Use Image")
+                                Text("Use Image").foregroundColor(Color.black)
                                     .frame(maxWidth: .infinity, alignment: .trailing)
-                            }.padding([.trailing], imageButton ? 130 : 50)
+                            }.padding([.trailing], imageButton ? 130 : 50).tint(Color.mint)
                         }
                         HStack {
                             VStack {
                                 if (!rainbowButton && !imageButton) {
                                     Label(
-                                        title: { Text("RGB Values (0-255)") },
-                                        icon: { Image(systemName: "paintpalette") }
+                                        title: { Text("RGB Values (0-255)").foregroundColor(Color.black) },
+                                        icon: { Image(systemName: "paintpalette").foregroundColor(Color.black) }
                                     )
                                     HStack {
                                         RoundedRectangle(cornerRadius: R)
